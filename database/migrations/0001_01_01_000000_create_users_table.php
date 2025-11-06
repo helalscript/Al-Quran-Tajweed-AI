@@ -29,6 +29,8 @@ return new class extends Migration {
             $table->string('reset_password_token')->nullable();
             $table->timestamp('reset_password_token_expire_at')->nullable();
             $table->timestamp('last_seen')->nullable();
+            $table->string('language_code', 10)->default('en'); // default language code
+            $table->string('timezone')->nullable(); // timezone
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->rememberToken();
             $table->timestamps();

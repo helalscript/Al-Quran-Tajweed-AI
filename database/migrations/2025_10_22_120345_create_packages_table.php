@@ -13,14 +13,14 @@ return new class extends Migration
     {
         Schema::create('packages', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
+            $table->string('title')->nullable();
             $table->decimal('price_weekly', 10, 2)->nullable();
             $table->decimal('price_monthly', 10, 2)->nullable();
             $table->decimal('price_yearly', 10, 2)->nullable();
             $table->decimal('price_offer', 10, 2)->nullable();
             $table->integer('free_trail_day')->default(0);
-            $table->text('description');
-            $table->string('image');
+            $table->text('description')->nullable();
+            $table->string('image')->nullable();
             $table->string('status')->default('active');
             $table->timestamps();
         });

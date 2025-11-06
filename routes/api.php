@@ -10,10 +10,12 @@ use App\Http\Controllers\API\V1\Auth\UserController;
 use App\Http\Controllers\API\V1\Public\GeneralSettingController;
 use App\Http\Controllers\API\V1\Public\PackageController;
 use App\Http\Controllers\API\V1\Public\StepperPageController as PublicStepperPageController;
+use App\Http\Controllers\API\V1\User\AppLanguageController;
 use App\Http\Controllers\API\V1\User\CheckInController;
 use App\Http\Controllers\API\V1\User\GoalController;
 use App\Http\Controllers\API\V1\User\NotificationController;
 use App\Http\Controllers\API\V1\User\PaymentController;
+use App\Http\Controllers\API\V1\User\PrayerTimeController;
 use App\Http\Controllers\API\V1\User\ProgressPageController;
 use App\Http\Controllers\API\V1\User\TipsController;
 use Illuminate\Http\Request;
@@ -49,12 +51,21 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
 
 // this is for user
 Route::group(['middleware' => ['auth:api', 'is_user']], function ($router) {
-    
 
+    // prayer times
+    Route::post('prayer-times', [PrayerTimeController::class, 'getPrayerTimes']);
+    // prayer time notification settings
+    Route::get('prayer-time-notification-settings', [PrayerTimeController::class, 'getPrayerTimeNotificationSettings']);
+    Route::put('update-prayer-time-notification-settings', [PrayerTimeController::class, 'updatePrayerTimeNotificationSettings']);
+    
     // notifications
     Route::apiResource('notifications', NotificationController::class)->only(['index', 'show']);
     Route::post('notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
     Route::delete('notifications/delete-all', [NotificationController::class, 'deleteAll']);
+
+    // app languages
+    Route::get('app-languages', [AppLanguageController::class, 'index']);
+    Route::post('set-language', [AppLanguageController::class, 'setLanguage']);
 
 });
 

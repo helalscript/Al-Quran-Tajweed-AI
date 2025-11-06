@@ -39,6 +39,8 @@ class User extends Authenticatable implements JWTSubject
         'email_verified_at',
         'last_seen',
         'role',
+        'language_code',
+        'timezone',
         'status',
     ];
 
@@ -118,5 +120,20 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    protected static function booted()
+    {
+        static::created(function ($user) {
+            // Automatically create a prayer notification when a user is created
+            PrayerTimeNotification::create([
+                'user_id' => $user->id,
+                'fajr' => true,
+                'dhuhr' => true,
+                'asr' => true,
+                'maghrib' => true,
+                'isha' => true,
+            ]);
+        });
     }
 }
