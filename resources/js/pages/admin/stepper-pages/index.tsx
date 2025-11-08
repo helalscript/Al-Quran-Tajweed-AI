@@ -99,7 +99,7 @@ export default function Index({ pages, filters }: Props) {
 								<TableHead>Image</TableHead>
 								<TableHead>Order No</TableHead>
 								<TableHead>Status</TableHead>
-								<TableHead>Action</TableHead>
+								{/* <TableHead>Action</TableHead> */}
 							</TableRow>
 						</TableHeader>
 
@@ -134,7 +134,7 @@ export default function Index({ pages, filters }: Props) {
 										</TableCell>
 
 										{/* ✅ Action Buttons */}
-										<TableCell className="flex gap-2">
+										{/*<TableCell className="flex gap-2">
 											<Link href={`/admin/stepper-pages/${page?.id}/edit`}>
 												<Button size="sm" variant="outline">Edit</Button>
 											</Link>
@@ -146,7 +146,7 @@ export default function Index({ pages, filters }: Props) {
 											>
 												Delete
 											</Button>
-										</TableCell>
+										</TableCell>*/}
 									</TableRow>
 								))
 							) : (

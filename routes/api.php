@@ -6,18 +6,15 @@ use App\Http\Controllers\API\V1\Auth\LoginController;
 use App\Http\Controllers\API\V1\Auth\LogoutController;
 use App\Http\Controllers\API\V1\Auth\RegisterController;
 use App\Http\Controllers\API\V1\Auth\ResetPasswordController;
+use App\Http\Controllers\API\V1\Auth\SocialLoginController;
 use App\Http\Controllers\API\V1\Auth\UserController;
 use App\Http\Controllers\API\V1\Public\GeneralSettingController;
 use App\Http\Controllers\API\V1\Public\PackageController;
 use App\Http\Controllers\API\V1\Public\StepperPageController as PublicStepperPageController;
 use App\Http\Controllers\API\V1\User\AppLanguageController;
-use App\Http\Controllers\API\V1\User\CheckInController;
-use App\Http\Controllers\API\V1\User\GoalController;
 use App\Http\Controllers\API\V1\User\NotificationController;
-use App\Http\Controllers\API\V1\User\PaymentController;
 use App\Http\Controllers\API\V1\User\PrayerTimeController;
-use App\Http\Controllers\API\V1\User\ProgressPageController;
-use App\Http\Controllers\API\V1\User\TipsController;
+use App\Http\Controllers\API\V1\User\QiblaDirectionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -38,7 +35,7 @@ Route::group(['middleware' => ['guest:api']], function ($router) {
     Route::post('/verify-otp', [ResetPasswordController::class, 'VerifyOTP']);
     Route::post('/reset-password', [ResetPasswordController::class, 'ResetPassword']);
     // social login
-    // Route::post('/social-login', [SocialLoginController::class, 'SocialLogin']);
+    Route::post('/social-login', [SocialLoginController::class, 'SocialLogin']);
 });
 
 Route::group(['middleware' => 'auth:api'], function ($router) {
@@ -57,7 +54,10 @@ Route::group(['middleware' => ['auth:api', 'is_user']], function ($router) {
     // prayer time notification settings
     Route::get('prayer-time-notification-settings', [PrayerTimeController::class, 'getPrayerTimeNotificationSettings']);
     Route::put('update-prayer-time-notification-settings', [PrayerTimeController::class, 'updatePrayerTimeNotificationSettings']);
-    
+
+    // qibla direction
+    Route::post('qibla-direction', [QiblaDirectionController::class, 'getDirection']);
+
     // notifications
     Route::apiResource('notifications', NotificationController::class)->only(['index', 'show']);
     Route::post('notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
