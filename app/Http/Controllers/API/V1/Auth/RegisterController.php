@@ -38,8 +38,8 @@ class RegisterController extends Controller
         ]);
 
         try {
-            $otp = 1234; // For testing purposes, you can use a fixed OTP. In production, generate a random OTP.
-            // $otp = rand(1000, 9999);
+            $otp = 123456; // For testing purposes, you can use a fixed OTP. In production, generate a random OTP.
+            // $otp = rand(1000, 999999);
             $otpExpiresAt = Carbon::now()->addMinutes(60); // 1 hour
 
             // Check for soft-deleted user
@@ -104,7 +104,7 @@ class RegisterController extends Controller
     {
         $request->validate([
             'email' => 'required|email|exists:users,email',
-            'otp' => 'required|digits:4',
+            'otp' => 'required|digits:6',
         ]);
 
         try {
@@ -178,8 +178,8 @@ class RegisterController extends Controller
                 return Helper::jsonErrorResponse('Email already verified.', 409);
             }
 
-            // $newOtp = rand(1000, 9999);
-            $newOtp = 1234; // For testing purposes, you can comment this line. In production, uncomment it.
+            // $newOtp = rand(1000, 999999);
+            $newOtp = 123456; // For testing purposes, you can comment this line. In production, uncomment it.
             $otpExpiresAt = Carbon::now()->addMinutes(60);
             $user->otp = $newOtp;
             $user->otp_expires_at = $otpExpiresAt;

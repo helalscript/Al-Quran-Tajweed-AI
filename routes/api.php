@@ -11,6 +11,7 @@ use App\Http\Controllers\API\V1\Auth\UserController;
 use App\Http\Controllers\API\V1\Public\GeneralSettingController;
 use App\Http\Controllers\API\V1\Public\PackageController;
 use App\Http\Controllers\API\V1\Public\StepperPageController as PublicStepperPageController;
+use App\Http\Controllers\API\V1\User\AlQuranController;
 use App\Http\Controllers\API\V1\User\AppLanguageController;
 use App\Http\Controllers\API\V1\User\NotificationController;
 use App\Http\Controllers\API\V1\User\PrayerTimeController;
@@ -57,6 +58,10 @@ Route::group(['middleware' => ['auth:api', 'is_user']], function ($router) {
 
     // qibla direction
     Route::post('qibla-direction', [QiblaDirectionController::class, 'getDirection']);
+
+    // al quran
+    Route::get('al-quran/surahs', [AlQuranController::class, 'getAllSurahs']);
+    Route::get('al-quran/surahs/{number}/editions/{editions?}', [AlQuranController::class, 'getSurahByNumber']);
 
     // notifications
     Route::apiResource('notifications', NotificationController::class)->only(['index', 'show']);

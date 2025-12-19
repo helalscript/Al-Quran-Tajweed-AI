@@ -31,8 +31,8 @@ class ResetPasswordController extends Controller
         ]);
         try {
             $email = $request->input('email');
-            $otp = 1234;
-            // $otp = rand(1000, 9999);
+            $otp = 123456; // For testing purposes, you can use a fixed OTP. In production, generate a random OTP.
+            // $otp = rand(1000, 999999);
             $user = User::where('email', $email)->first();
 
             if ($user) {
@@ -61,7 +61,7 @@ class ResetPasswordController extends Controller
     {
         $request->validate([
             'email' => 'required|email|exists:users,email',
-            'otp' => 'required|digits:4',
+            'otp' => 'required|digits:6',
         ]);
         try {
             $email = $request->input('email');
