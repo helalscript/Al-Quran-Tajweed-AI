@@ -38,7 +38,7 @@ class ResetPasswordController extends Controller
             if ($user) {
                 // Mail::to($email)->send(new OtpMail($otp, $user, 'Reset Your Password')); // For testing purposes, you can comment this line. In production, uncomment it.
                 $user->update([
-                    'otp' => $otp,
+                    'otp'            => $otp,
                     'otp_expires_at' => Carbon::now()->addMinutes(60),
                 ]);
                 return Helper::jsonResponse(true, 'OTP Code Sent Successfully Please Check Your Email.', 200);
@@ -61,7 +61,7 @@ class ResetPasswordController extends Controller
     {
         $request->validate([
             'email' => 'required|email|exists:users,email',
-            'otp' => 'required|digits:6',
+            'otp'   => 'required|digits:6',
         ]);
         try {
             $email = $request->input('email');
@@ -81,16 +81,16 @@ class ResetPasswordController extends Controller
             }
             $token = Str::random(60);
             $user->update([
-                'otp' => null,
-                'otp_expires_at' => null,
-                'reset_password_token' => $token,
+                'otp'                            => null,
+                'otp_expires_at'                 => null,
+                'reset_password_token'           => $token,
                 'reset_password_token_expire_at' => Carbon::now()->addHour(),
             ]);
             return response()->json([
-                'status' => true,
+                'status'  => true,
                 'message' => 'OTP verified successfully.',
-                'code' => 200,
-                'token' => $token,
+                'code'    => 200,
+                'token'   => $token,
             ]);
         } catch (Exception $e) {
             Log::error('ResetPasswordController::VerifyOTP' . $e->getMessage());
@@ -107,8 +107,8 @@ class ResetPasswordController extends Controller
     public function ResetPassword(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|exists:users,email',
-            'token' => 'required|string',
+            'email'    => 'required|email|exists:users,email',
+            'token'    => 'required|string',
             'password' => 'required|string|min:6|confirmed',
         ]);
         try {
@@ -122,8 +122,8 @@ class ResetPasswordController extends Controller
 
             if (!empty($user->reset_password_token) && $user->reset_password_token === $request->token && $user->reset_password_token_expire_at >= Carbon::now()) {
                 $user->update([
-                    'password' => Hash::make($newPassword),
-                    'reset_password_token' => null,
+                    'password'                       => Hash::make($newPassword),
+                    'reset_password_token'           => null,
                     'reset_password_token_expire_at' => null,
                 ]);
 
