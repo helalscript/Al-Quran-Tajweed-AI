@@ -24,7 +24,7 @@ class LoginController extends Controller
 
         // return $next($request);
         $validateData = $request->validate([
-            'email' => 'required_without:user_name|string',
+            'email'    => 'required_without:user_name|string',
             'password' => 'required|string',
             // 'user_name' => 'required_without:email|string',
             // 'role' => 'required|in:customer,contractor',
@@ -57,13 +57,13 @@ class LoginController extends Controller
             $token = auth('api')->login($user);
 
             return response()->json([
-                'status' => true,
-                'message' => 'User logged in successfully.',
-                'code' => 200,
+                'status'     => true,
+                'message'    => 'User logged in successfully.',
+                'code'       => 200,
                 'token_type' => 'bearer',
-                'token' => $token,
+                'token'      => $token,
                 'expires_in' => auth('api')->factory()->getTTL() * 60,
-                'data' => auth('api')->user(),
+                'data'       => auth('api')->user(),
             ], 200);
         } catch (Exception $e) {
             Log::error('LoginController::Login'.$e->getMessage());
@@ -85,13 +85,13 @@ class LoginController extends Controller
             $refreshToken = auth('api')->refresh();
 
             return response()->json([
-                'status' => true,
-                'message' => 'Access token refreshed successfully.',
-                'code' => 200,
+                'status'     => true,
+                'message'    => 'Access token refreshed successfully.',
+                'code'       => 200,
                 'token_type' => 'bearer',
-                'token' => $refreshToken,
+                'token'      => $refreshToken,
                 'expires_in' => auth('api')->factory()->getTTL() * 60,
-                'data' => auth('api')->user(),
+                'data'       => auth('api')->user(),
             ]);
         } catch (Exception $e) {
             Log::error('LoginController::refreshToken'.$e->getMessage());

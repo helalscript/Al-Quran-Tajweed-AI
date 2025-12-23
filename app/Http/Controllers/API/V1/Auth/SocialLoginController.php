@@ -55,7 +55,7 @@ class SocialLoginController extends Controller
     public function SocialLogin(Request $request)
     {
         $request->validate([
-            'token' => 'required',
+            'token'    => 'required',
             'provider' => 'required|in:google,facebook,apple,instagram',
         ]);
 
@@ -69,11 +69,11 @@ class SocialLoginController extends Controller
                 if (!$user) {
                     $password = Str::random(16);
                     $user = User::create([
-                        'name' => $socialUser->getName(),
-                        'email' => $socialUser->getEmail(),
-                        'password' => bcrypt($password),
-                        'avatar' => $socialUser->getAvatar(),
-                        'role' => 'user',
+                        'name'              => $socialUser->getName(),
+                        'email'             => $socialUser->getEmail(),
+                        'password'          => bcrypt($password),
+                        'avatar'            => $socialUser->getAvatar(),
+                        'role'              => 'user',
                         'email_verified_at' => now(),
                     ]);
                 }
@@ -82,13 +82,13 @@ class SocialLoginController extends Controller
                 $token = auth('api')->login($user);
 
                 return response()->json([
-                    'status' => true,
-                    'message' => 'User logged in successfully.',
-                    'code' => 200,
+                    'status'     => true,
+                    'message'    => 'User logged in successfully.',
+                    'code'       => 200,
                     'token_type' => 'bearer',
-                    'token' => $token,
+                    'token'      => $token,
                     'expires_in' => auth('api')->factory()->getTTL() * 60,
-                    'data' => $user
+                    'data'       => $user
                 ], 200);
             } else {
                 return Helper::jsonResponse(false, 'Unauthorized', 401);
