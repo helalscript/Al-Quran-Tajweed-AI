@@ -46,4 +46,43 @@ class AlQuranController extends Controller
             return Helper::jsonErrorResponse('Failed to fetch surah', 500);
         }
     }
+
+    public function getAllJuzs()
+    {
+        try {
+            $juzs = $this->alQuranService->getAllJuzs();
+
+            return Helper::jsonResponse(true, 'Juzs fetched successfully', 200, $juzs);
+        } catch (Exception $e) {
+            Log::error('AlQuranController::getAllJuzs'.$e->getMessage());
+
+            return Helper::jsonErrorResponse('Failed to fetch juzs', 500);
+        }
+    }
+
+    public function getJuzByNumber(string $number)
+    {
+        try {
+            $juz = $this->alQuranService->getJuzByNumber($number);
+
+            return Helper::jsonResponse(true, 'Juz fetched successfully', 200, $juz);
+        } catch (Exception $e) {
+            Log::error('AlQuranController::getJuzByNumber'.$e->getMessage());
+
+            return Helper::jsonErrorResponse('Failed to fetch juz', 500);
+        }
+    }
+
+    public function getAllSurahsByUserLanguage()
+    {
+        try {
+            $surahs = $this->alQuranService->getAllSurahsByUserLanguage();
+
+            return Helper::jsonResponse(true, 'Surahs fetched successfully', 200, $surahs);
+        } catch (Exception $e) {
+            Log::error('AlQuranController::getAllSurahsByUserLanguage'.$e->getMessage());
+
+            return Helper::jsonErrorResponse('Failed to fetch surahs', 500);
+        }
+    }
 }

@@ -12,6 +12,7 @@ use App\Http\Controllers\API\V1\Public\GeneralSettingController;
 use App\Http\Controllers\API\V1\Public\PackageController;
 use App\Http\Controllers\API\V1\Public\StepperPageController as PublicStepperPageController;
 use App\Http\Controllers\API\V1\User\AlQuranController;
+use App\Http\Controllers\API\V1\User\AppDisplaySettingsController;
 use App\Http\Controllers\API\V1\User\AppLanguageController;
 use App\Http\Controllers\API\V1\User\NotificationController;
 use App\Http\Controllers\API\V1\User\PrayerTimeController;
@@ -62,6 +63,14 @@ Route::group(['middleware' => ['auth:api', 'is_user']], function ($router) {
     // al quran
     Route::get('al-quran/surahs', [AlQuranController::class, 'getAllSurahs']);
     Route::get('al-quran/surahs/{number}/editions/{editions?}', [AlQuranController::class, 'getSurahByNumber']);
+    // Juzs
+    Route::get('al-quran/juzs', [AlQuranController::class, 'getAllJuzs']);
+
+    // Juz by number
+    Route::get('al-quran/juzs/{number}', [AlQuranController::class, 'getJuzByNumber']);
+
+    // all surahs by user language
+    Route::get('al-quran/surahs-by-user-language', [AlQuranController::class, 'getAllSurahsByUserLanguage']);
 
     // notifications
     Route::apiResource('notifications', NotificationController::class)->only(['index', 'show']);
@@ -71,6 +80,10 @@ Route::group(['middleware' => ['auth:api', 'is_user']], function ($router) {
     // app languages
     Route::get('app-languages', [AppLanguageController::class, 'index']);
     Route::post('set-language', [AppLanguageController::class, 'setLanguage']);
+
+    // app display settings
+    Route::get('display-settings', [AppDisplaySettingsController::class, 'getDisplaySettings']);
+    Route::put('display-settings', [AppDisplaySettingsController::class, 'updateDisplaySettings']);
 
 });
 
