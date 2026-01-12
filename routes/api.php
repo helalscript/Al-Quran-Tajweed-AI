@@ -12,7 +12,12 @@ use App\Http\Controllers\API\V1\Public\GeneralSettingController;
 use App\Http\Controllers\API\V1\Public\PackageController;
 use App\Http\Controllers\API\V1\Public\StepperPageController as PublicStepperPageController;
 use App\Http\Controllers\API\V1\User\AlQuranController;
+use App\Http\Controllers\API\V1\User\AppDisplaySettingsController;
 use App\Http\Controllers\API\V1\User\AppLanguageController;
+use App\Http\Controllers\API\V1\User\CategoryController;
+use App\Http\Controllers\API\V1\User\DuaDhikrController;
+use App\Http\Controllers\API\V1\User\FavouriteController;
+use App\Http\Controllers\API\V1\User\MemorizationController;
 use App\Http\Controllers\API\V1\User\NotificationController;
 use App\Http\Controllers\API\V1\User\PrayerTimeController;
 use App\Http\Controllers\API\V1\User\QiblaDirectionController;
@@ -62,6 +67,14 @@ Route::group(['middleware' => ['auth:api', 'is_user']], function ($router) {
     // al quran
     Route::get('al-quran/surahs', [AlQuranController::class, 'getAllSurahs']);
     Route::get('al-quran/surahs/{number}/editions/{editions?}', [AlQuranController::class, 'getSurahByNumber']);
+    // Juzs
+    Route::get('al-quran/juzs', [AlQuranController::class, 'getAllJuzs']);
+
+    // Juz by number
+    Route::get('al-quran/juzs/{number}', [AlQuranController::class, 'getJuzByNumber']);
+
+    // all surahs by user language
+    Route::get('al-quran/surahs-by-user-language', [AlQuranController::class, 'getAllSurahsByUserLanguage']);
 
     // notifications
     Route::apiResource('notifications', NotificationController::class)->only(['index', 'show']);
@@ -71,6 +84,35 @@ Route::group(['middleware' => ['auth:api', 'is_user']], function ($router) {
     // app languages
     Route::get('app-languages', [AppLanguageController::class, 'index']);
     Route::post('set-language', [AppLanguageController::class, 'setLanguage']);
+
+    // app display settings
+    Route::get('display-settings', [AppDisplaySettingsController::class, 'getDisplaySettings']);
+    Route::put('display-settings', [AppDisplaySettingsController::class, 'updateDisplaySettings']);
+
+    // memorization
+    Route::post('memorization/sessions/start', [MemorizationController::class, 'startSession']);
+    Route::get('memorization/sessions/{id}', [MemorizationController::class, 'getSession']);
+    Route::put('memorization/sessions/{id}/end', [MemorizationController::class, 'endSession']);
+    Route::post('memorization/sessions/{id}/recite', [MemorizationController::class, 'streamRecitation']);
+    Route::get('memorization/history', [MemorizationController::class, 'getHistory']);
+    Route::get('memorization/sessions/{id}/mistakes', [MemorizationController::class, 'getMistakes']);
+
+    // dua categories
+    Route::get('dua/categories', [CategoryController::class, 'index']);
+    Route::get('dua/categories/{id}', [CategoryController::class, 'show']);
+    Route::get('dua/categories/slug/{slug}', [CategoryController::class, 'getBySlug']);
+
+    // dua dhikrs
+    Route::get('dua/categories/{categoryId}/duas', [DuaDhikrController::class, 'getByCategory']);
+    Route::get('dua/categories/slug/{slug}/duas', [DuaDhikrController::class, 'getByCategorySlug']);
+    Route::get('dua/{id}', [DuaDhikrController::class, 'show']);
+    Route::get('dua/search', [DuaDhikrController::class, 'search']);
+
+    // favourites
+    Route::get('favourites', [FavouriteController::class, 'index']);
+    Route::post('favourites', [FavouriteController::class, 'store']);
+    Route::post('favourites/toggle', [FavouriteController::class, 'toggle']);
+    Route::delete('favourites/{id}', [FavouriteController::class, 'destroy']);
 
 });
 
