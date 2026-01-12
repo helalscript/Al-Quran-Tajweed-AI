@@ -121,12 +121,5 @@ We welcome contributions to improve the app! If you have an idea for a feature o
 
 This app is open-source and licensed under the MIT License.
 
-## Contact
-
-If you have any questions or feedback, feel free to reach out via:
-- Email: husoaib422@gmail.com
-- Website: https://devhelal.com
-
----
 
 Thank you for using **Al-Quran App**. May it help you in your journey of faith!
