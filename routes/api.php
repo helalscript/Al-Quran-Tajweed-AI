@@ -14,6 +14,7 @@ use App\Http\Controllers\API\V1\Public\StepperPageController as PublicStepperPag
 use App\Http\Controllers\API\V1\User\AlQuranController;
 use App\Http\Controllers\API\V1\User\AppDisplaySettingsController;
 use App\Http\Controllers\API\V1\User\AppLanguageController;
+use App\Http\Controllers\API\V1\User\MemorizationController;
 use App\Http\Controllers\API\V1\User\NotificationController;
 use App\Http\Controllers\API\V1\User\PrayerTimeController;
 use App\Http\Controllers\API\V1\User\QiblaDirectionController;
@@ -84,6 +85,14 @@ Route::group(['middleware' => ['auth:api', 'is_user']], function ($router) {
     // app display settings
     Route::get('display-settings', [AppDisplaySettingsController::class, 'getDisplaySettings']);
     Route::put('display-settings', [AppDisplaySettingsController::class, 'updateDisplaySettings']);
+
+    // memorization
+    Route::post('memorization/sessions/start', [MemorizationController::class, 'startSession']);
+    Route::get('memorization/sessions/{id}', [MemorizationController::class, 'getSession']);
+    Route::put('memorization/sessions/{id}/end', [MemorizationController::class, 'endSession']);
+    Route::post('memorization/sessions/{id}/recite', [MemorizationController::class, 'streamRecitation']);
+    Route::get('memorization/history', [MemorizationController::class, 'getHistory']);
+    Route::get('memorization/sessions/{id}/mistakes', [MemorizationController::class, 'getMistakes']);
 
 });
 
