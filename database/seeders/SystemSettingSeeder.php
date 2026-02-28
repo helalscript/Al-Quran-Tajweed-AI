@@ -19,7 +19,7 @@ class SystemSettingSeeder extends Seeder
             'email' => 'example@email.com',
             'contact_number' => '+880000000',
             'company_open_hour' => '24 HOUR',
-            'copyright_text' => '© Copyright 2025, All right reserved',
+            'copyright_text' => '© Copyright 2026, All right reserved',
             'logo' => 'uploads/logos/logo.png',
             'favicon' => 'uploads/favicons/favicon.png',
             'address' => 'TEST',

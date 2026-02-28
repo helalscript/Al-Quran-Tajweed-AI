@@ -72,11 +72,27 @@ class AlQuranService
 
                     $data = $response->json('data');
 
+                    $surahsInJuz = [];
+
+                    foreach ($data['ayahs'] as $ayah) {
+                        $surah = $ayah['surah'];
+                        $surahNumber = $surah['number'];
+
+                        if (! isset($surahsInJuz[$surahNumber])) {
+                            $surahsInJuz[$surahNumber] = [
+                                'number' => $surahNumber,
+                                'name' => $surah['name'],
+                                'english_name' => $surah['englishName'],
+                            ];
+                        }
+                    }
+
                     $juzs[] = [
                         'juz' => $i,
                         'ayahs_count' => count($data['ayahs']),
                         'start_surah' => $data['ayahs'][0]['surah']['englishName'],
                         'start_ayah' => $data['ayahs'][0]['numberInSurah'],
+                        'surahs' => array_values($surahsInJuz),
                     ];
                 }
 
