@@ -132,6 +132,15 @@
     --sidebar-ring: oklch(0.439 0 0);
 }
 
+@keyframes toast-progress {
+    from {
+        width: 100%;
+    }
+    to {
+        width: 0%;
+    }
+}
+
 @layer base {
     * {
         @apply border-border;
