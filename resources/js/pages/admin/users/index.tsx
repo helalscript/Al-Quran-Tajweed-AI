@@ -29,17 +29,18 @@ import { useState } from 'react';
 
 interface ColumnMeta {
     label: string;
-    type?: 'status' | 'image';
+    type?: 'status' | 'image' | 'datetime';
     visible?: boolean;
 }
 
-interface StepperPageItem {
+interface UserItem {
     id: number;
-    title: string;
-    description?: string | null;
-    image?: string | null;
-    order_no: number;
-    status: string;
+    avatar?: string | null;
+    name: string;
+    email: string;
+    phone?: string | null;
+    role?: string | null;
+    status?: string | null;
 }
 
 interface Paginated<T> {
@@ -54,7 +55,7 @@ interface Props {
     title: string;
     resource: string;
     columns: Record<string, ColumnMeta>;
-    items: Paginated<StepperPageItem>;
+    items: Paginated<UserItem>;
     filters: {
         search?: string;
         status?: string;
@@ -66,7 +67,7 @@ interface Props {
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: dashboard().url },
-    { title: 'Stepper Pages', href: '/admin/stepper-pages' },
+    { title: 'Users', href: '/admin/users' },
 ];
 
 export default function Index({ title, columns, items, filters }: Props) {
@@ -80,7 +81,7 @@ export default function Index({ title, columns, items, filters }: Props) {
         sort_dir?: string;
     }) => {
         router.get(
-            '/admin/stepper-pages',
+            '/admin/users',
             {
                 search: partial.search ?? filters.search ?? '',
                 status: partial.status ?? filters.status ?? '',
@@ -122,26 +123,20 @@ export default function Index({ title, columns, items, filters }: Props) {
         );
     };
 
-    const handleToggleStatus = (id: number) => {
-        router.patch(`/admin/stepper-pages/${id}/toggle`, {}, {
-            preserveScroll: true,
-            preserveState: true,
-        });
-    };
-
-    const handleDelete = (id: number) => {
-        if (!confirm('Are you sure you want to delete this stepper page?')) {
-            return;
-        }
-        router.delete(`/admin/stepper-pages/${id}`, {
-            preserveScroll: true,
-            preserveState: true,
-        });
-    };
-
     const visibleColumns = Object.entries(columns).filter(
         ([, meta]) => meta.visible !== false,
     );
+
+    const handleToggleStatus = (id: number) => {
+        router.patch(
+            `/admin/users/${id}/toggle`,
+            {},
+            {
+                preserveScroll: true,
+                preserveState: true,
+            },
+        );
+    };
 
     const getImageSrc = (value: string | null | undefined) => {
         if (!value) return null;
@@ -179,7 +174,6 @@ export default function Index({ title, columns, items, filters }: Props) {
                                 value={filters.status ?? ''}
                                 onChange={(e) =>
                                     handleFilterChange({
-                                        // pass empty string for "All Status" so backend clears filter
                                         status: e.target.value,
                                     })
                                 }
@@ -206,9 +200,7 @@ export default function Index({ title, columns, items, filters }: Props) {
                     </div>
 
                     <div className="text-right">
-                        <Link href="/admin/stepper-pages/create">
-                            <Button>Add New</Button>
-                        </Link>
+                        {/* Future: add \"Create User\" button if needed */}
                     </div>
                 </div>
 
@@ -221,8 +213,8 @@ export default function Index({ title, columns, items, filters }: Props) {
                                     <TableHead key={key}>
                                         <div className="flex items-center gap-2">
                                             <span>{meta.label}</span>
-                                            {(key === 'title' ||
-                                                key === 'order_no') && (
+                                            {(key === 'name' ||
+                                                key === 'email') && (
                                                 <button
                                                     type="button"
                                                     className="inline-flex items-center gap-1 rounded px-1 py-0.5 text-xs text-neutral-600 hover:bg-neutral-200/60 dark:text-neutral-300 dark:hover:bg-neutral-700/60"
@@ -239,34 +231,52 @@ export default function Index({ title, columns, items, filters }: Props) {
                                         </div>
                                     </TableHead>
                                 ))}
-                                <TableHead className="w-[150px]">Actions</TableHead>
+                                <TableHead className="w-[140px]">
+                                    Actions
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
 
                         <TableBody>
                             {items.data.length > 0 ? (
-                                items.data.map((page, index) => (
-                                    <TableRow key={page.id}>
+                                items.data.map((user, index) => (
+                                    <TableRow key={user.id}>
                                         <TableCell>
-                                            {(items.current_page - 1) * (filters.per_page ?? 10) + index + 1}
+                                            {(items.current_page - 1) *
+                                                (filters.per_page ?? 10) +
+                                                index +
+                                                1}
                                         </TableCell>
 
                                         {visibleColumns.map(([key, meta]) => {
-                                            const value = (page as unknown as Record<string, unknown>)[key];
+                                            const value = (user as unknown as Record<
+                                                string,
+                                                unknown
+                                            >)[key];
 
                                             if (meta.type === 'image') {
-                                                const src = getImageSrc(value as string);
+                                                const src = getImageSrc(
+                                                    value as string,
+                                                );
                                                 return (
                                                     <TableCell key={key}>
                                                         {src ? (
                                                             <img
                                                                 src={src}
-                                                                alt={page.title}
-                                                                className="h-16 w-16 rounded object-cover"
+                                                                alt={
+                                                                    user.name ??
+                                                                    'Avatar'
+                                                                }
+                                                                className="h-10 w-10 rounded-full object-cover"
                                                             />
                                                         ) : (
-                                                            <span className="text-xs text-neutral-400">
-                                                                No Image
+                                                            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-neutral-200 text-xs font-medium text-neutral-600">
+                                                                {user.name
+                                                                    ?.charAt(
+                                                                        0,
+                                                                    )
+                                                                    .toUpperCase() ??
+                                                                    '?'}
                                                             </span>
                                                         )}
                                                     </TableCell>
@@ -274,12 +284,17 @@ export default function Index({ title, columns, items, filters }: Props) {
                                             }
 
                                             if (meta.type === 'status') {
-                                                const isActive = value === 'active';
+                                                const isActive =
+                                                    value === 'active';
                                                 return (
                                                     <TableCell key={key}>
                                                         <button
                                                             type="button"
-                                                            onClick={() => handleToggleStatus(page.id)}
+                                                            onClick={() =>
+                                                                handleToggleStatus(
+                                                                    user.id,
+                                                                )
+                                                            }
                                                             className={`relative inline-flex h-6 w-12 items-center rounded-full border border-transparent text-xs font-medium transition-colors ${
                                                                 isActive
                                                                     ? 'bg-emerald-500'
@@ -298,36 +313,44 @@ export default function Index({ title, columns, items, filters }: Props) {
                                                 );
                                             }
 
+                                            if (meta.type === 'datetime') {
+                                                const date =
+                                                    value &&
+                                                    new Date(
+                                                        String(value),
+                                                    );
+
+                                                return (
+                                                    <TableCell key={key}>
+                                                        {value && !isNaN(
+                                                            date.getTime(),
+                                                        )
+                                                            ? date.toLocaleString()
+                                                            : ''}
+                                                    </TableCell>
+                                                );
+                                            }
+
                                             return (
                                                 <TableCell key={key}>
                                                     {String(value ?? '')}
                                                 </TableCell>
                                             );
                                         })}
-
                                         <TableCell>
-                                            <div className="flex gap-2">
-                                                <Link href={`/admin/stepper-pages/${page.id}/edit`}>
-                                                    <Button size="sm" variant="outline">
-                                                        Edit
-                                                    </Button>
-                                                </Link>
-                                                <Button
-                                                    size="sm"
-                                                    variant="destructive"
-                                                    onClick={() => handleDelete(page.id)}
-                                                >
-                                                    Delete
+                                            <Link href={`/admin/users/${user.id}`}>
+                                                <Button size="sm" variant="outline">
+                                                    View
                                                 </Button>
-                                            </div>
+                                            </Link>
                                         </TableCell>
                                     </TableRow>
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={visibleColumns.length + 2}>
+                                    <TableCell colSpan={visibleColumns.length + 1}>
                                         <div className="py-6 text-center text-sm text-neutral-500">
-                                            No Data Available
+                                            No users found
                                         </div>
                                     </TableCell>
                                 </TableRow>
@@ -361,3 +384,4 @@ export default function Index({ title, columns, items, filters }: Props) {
         </AppLayout>
     );
 }
+
