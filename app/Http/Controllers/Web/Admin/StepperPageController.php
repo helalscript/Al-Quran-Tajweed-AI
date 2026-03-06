@@ -2,47 +2,62 @@
 
 namespace App\Http\Controllers\Web\Admin;
 
-
 use App\Facades\DataTable;
-use App\Helpers\Helper;
-use App\Http\Controllers\Controller;
 use App\Models\StepperPage;
-use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class StepperPageController extends Controller
+class StepperPageController extends BaseAdminResourceController
 {
-    public function index(Request $request): Response
+    protected function resourceConfig(): array
     {
-        $perPage = $request->per_page ?? 10;
-        $search = $request->search;
-
-        $query = StepperPage::query();
-        if ($search) {
-            $query->where('title', 'like', "%{$search}%")
-                ->orWhere('description', 'like', "%{$search}%");
-        }
-
-        $pages = $query->orderBy('order_no')->paginate($perPage);
-        // return Inertia::render('dashboard', [
-        //     'pages' => $pages,
-        //     'filters' => [
-        //         'search' => $search,
-        //         'per_page' => $perPage,
-        //     ],
-        // ]);
-        // dd($pages->toArray());
-        return Inertia::render('admin/stepper-pages/index', [
-            'pages' => $pages,
-            'filters' => [
-                'search' => $search,
-                'per_page' => $perPage,
+        return [
+            'name' => 'stepper-pages',
+            'title' => 'Stepper Pages',
+            'model' => StepperPage::class,
+            'index_view' => 'admin/stepper-pages/index',
+            'order_by' => ['order_no', 'asc'],
+            'allowed_sorts' => ['title', 'order_no'],
+            'status_column' => 'status',
+            'status_active' => 'active',
+            'status_inactive' => 'inactive',
+            'columns' => [
+                'title' => [
+                    'label' => 'Title',
+                    'searchable' => true,
+                    'filterable' => false,
+                    'visible' => true,
+                ],
+                'description' => [
+                    'label' => 'Description',
+                    'searchable' => true,
+                    'filterable' => false,
+                    'visible' => false,
+                ],
+                'image' => [
+                    'label' => 'Image',
+                    'type' => 'image',
+                    'searchable' => false,
+                    'filterable' => false,
+                    'visible' => true,
+                ],
+                'order_no' => [
+                    'label' => 'Order No',
+                    'searchable' => false,
+                    'filterable' => false,
+                    'visible' => true,
+                ],
+                'status' => [
+                    'label' => 'Status',
+                    'type' => 'status',
+                    'searchable' => false,
+                    'filterable' => true,
+                    'visible' => true,
+                ],
             ],
-        ]);
+        ];
     }
 
     public function create(): Response
@@ -55,64 +70,69 @@ class StepperPageController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'image' => 'nullable|string',
+            'image' => 'nullable|image|max:2048',
             'order_no' => 'required|integer|min:0',
             'status' => 'required|string|in:active,inactive',
         ]);
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('stepper-pages', 'public');
+            $validated['image'] = 'storage/'.$imagePath;
+        } else {
+            unset($validated['image']);
+        }
 
         StepperPage::create($validated);
 
         return redirect()->route('admin.stepper-pages.index')->with('success', 'Stepper page created successfully.');
     }
 
-    public function show(string $id): Response
+    public function show(StepperPage $stepper_page): Response
     {
-        $page = StepperPage::findOrFail($id);
-
         return Inertia::render('admin/stepper-pages/show', [
-            'page' => $page,
+            'page' => $stepper_page,
         ]);
     }
 
-    public function edit(string $id): Response
+    public function edit(StepperPage $stepper_page): Response
     {
-        $page = StepperPage::findOrFail($id);
-
         return Inertia::render('admin/stepper-pages/edit', [
-            'page' => $page,
+            'page' => $stepper_page,
         ]);
     }
 
-    public function update(Request $request, string $id): RedirectResponse
+    public function update(Request $request, StepperPage $stepper_page): RedirectResponse
     {
+   
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'image' => 'nullable|string',
+            'image' => 'nullable|image|max:2048',
             'order_no' => 'required|integer|min:0',
             'status' => 'required|string|in:active,inactive',
         ]);
 
-        $page = StepperPage::findOrFail($id);
-        $page->update($validated);
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('stepper-pages', 'public');
+            $validated['image'] = 'storage/'.$imagePath;
+        } else {
+            unset($validated['image']);
+        }
+
+        $stepper_page->update($validated);
 
         return redirect()->route('admin.stepper-pages.index')->with('success', 'Stepper page updated successfully.');
     }
 
-    public function destroy(string $id): RedirectResponse
+    public function destroy(StepperPage $stepper_page): RedirectResponse
     {
-        $page = StepperPage::findOrFail($id);
-        $page->delete();
-
-        return redirect()->route('admin.stepper-pages.index')->with('success', 'Stepper page deleted successfully.');
+        return $this->destroyModel($stepper_page)->with('success', 'Stepper page deleted successfully.');
     }
 
-    public function toggleStatus(string $id)
+    public function toggleStatus(StepperPage $stepper_page, Request $request): RedirectResponse
     {
-        $page = StepperPage::findOrFail($id);
-        $page->status = $page->status === 'active' ? 'inactive' : 'active';
-        $page->save();
-        return back()->with('success', 'Status updated.');
+        return $this->toggleModelStatus($stepper_page);
     }
 
     public function newIndex(Request $request): Response
@@ -129,13 +149,8 @@ class StepperPageController extends Controller
             ->allowedSorts(['name'])
             ->make();
 
-
         return Inertia::render('admin/stepper-pages/partials/index', [
             'pages' => $result,
-            // 'filters' => [
-            //     'search' => $search,
-            //     'per_page' => $perPage,
-            // ],
         ]);
     }
 }

@@ -29,16 +29,14 @@ import { useState } from 'react';
 
 interface ColumnMeta {
     label: string;
-    type?: 'status' | 'image';
+    type?: 'status';
     visible?: boolean;
 }
 
-interface StepperPageItem {
+interface DynamicPageItem {
     id: number;
-    title: string;
-    description?: string | null;
-    image?: string | null;
-    order_no: number;
+    page_title: string;
+    page_slug: string;
     status: string;
 }
 
@@ -54,7 +52,7 @@ interface Props {
     title: string;
     resource: string;
     columns: Record<string, ColumnMeta>;
-    items: Paginated<StepperPageItem>;
+    items: Paginated<DynamicPageItem>;
     filters: {
         search?: string;
         status?: string;
@@ -66,7 +64,7 @@ interface Props {
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: dashboard().url },
-    { title: 'Stepper Pages', href: '/admin/stepper-pages' },
+    { title: 'Dynamic Pages', href: '/admin/pages' },
 ];
 
 export default function Index({ title, columns, items, filters }: Props) {
@@ -80,7 +78,7 @@ export default function Index({ title, columns, items, filters }: Props) {
         sort_dir?: string;
     }) => {
         router.get(
-            '/admin/stepper-pages',
+            '/admin/pages',
             {
                 search: partial.search ?? filters.search ?? '',
                 status: partial.status ?? filters.status ?? '',
@@ -123,17 +121,21 @@ export default function Index({ title, columns, items, filters }: Props) {
     };
 
     const handleToggleStatus = (id: number) => {
-        router.patch(`/admin/stepper-pages/${id}/toggle`, {}, {
-            preserveScroll: true,
-            preserveState: true,
-        });
+        router.patch(
+            `/admin/pages/${id}/toggle`,
+            {},
+            {
+                preserveScroll: true,
+                preserveState: true,
+            },
+        );
     };
 
     const handleDelete = (id: number) => {
-        if (!confirm('Are you sure you want to delete this stepper page?')) {
+        if (!confirm('Are you sure you want to delete this page?')) {
             return;
         }
-        router.delete(`/admin/stepper-pages/${id}`, {
+        router.delete(`/admin/pages/${id}`, {
             preserveScroll: true,
             preserveState: true,
         });
@@ -142,12 +144,6 @@ export default function Index({ title, columns, items, filters }: Props) {
     const visibleColumns = Object.entries(columns).filter(
         ([, meta]) => meta.visible !== false,
     );
-
-    const getImageSrc = (value: string | null | undefined) => {
-        if (!value) return null;
-        if (value.startsWith('http')) return value;
-        return value.startsWith('/') ? value : `/${value}`;
-    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -159,7 +155,7 @@ export default function Index({ title, columns, items, filters }: Props) {
                         <div className="w-full md:w-1/3">
                             <InputGroup>
                                 <InputGroupInput
-                                    placeholder="Search..."
+                                    placeholder="Search pages..."
                                     value={searchValue}
                                     onChange={(e) => {
                                         const value = e.target.value;
@@ -179,7 +175,6 @@ export default function Index({ title, columns, items, filters }: Props) {
                                 value={filters.status ?? ''}
                                 onChange={(e) =>
                                     handleFilterChange({
-                                        // pass empty string for "All Status" so backend clears filter
                                         status: e.target.value,
                                     })
                                 }
@@ -206,7 +201,7 @@ export default function Index({ title, columns, items, filters }: Props) {
                     </div>
 
                     <div className="text-right">
-                        <Link href="/admin/stepper-pages/create">
+                        <Link href="/admin/pages/create">
                             <Button>Add New</Button>
                         </Link>
                     </div>
@@ -221,8 +216,8 @@ export default function Index({ title, columns, items, filters }: Props) {
                                     <TableHead key={key}>
                                         <div className="flex items-center gap-2">
                                             <span>{meta.label}</span>
-                                            {(key === 'title' ||
-                                                key === 'order_no') && (
+                                            {(key === 'page_title' ||
+                                                key === 'page_slug') && (
                                                 <button
                                                     type="button"
                                                     className="inline-flex items-center gap-1 rounded px-1 py-0.5 text-xs text-neutral-600 hover:bg-neutral-200/60 dark:text-neutral-300 dark:hover:bg-neutral-700/60"
@@ -239,7 +234,9 @@ export default function Index({ title, columns, items, filters }: Props) {
                                         </div>
                                     </TableHead>
                                 ))}
-                                <TableHead className="w-[150px]">Actions</TableHead>
+                                <TableHead className="w-[210px]">
+                                    Actions
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
 
@@ -248,38 +245,27 @@ export default function Index({ title, columns, items, filters }: Props) {
                                 items.data.map((page, index) => (
                                     <TableRow key={page.id}>
                                         <TableCell>
-                                            {(items.current_page - 1) * (filters.per_page ?? 10) + index + 1}
+                                            {(items.current_page - 1) *
+                                                (filters.per_page ?? 10) +
+                                                index +
+                                                1}
                                         </TableCell>
 
                                         {visibleColumns.map(([key, meta]) => {
                                             const value = (page as unknown as Record<string, unknown>)[key];
 
-                                            if (meta.type === 'image') {
-                                                const src = getImageSrc(value as string);
-                                                return (
-                                                    <TableCell key={key}>
-                                                        {src ? (
-                                                            <img
-                                                                src={src}
-                                                                alt={page.title}
-                                                                className="h-16 w-16 rounded object-cover"
-                                                            />
-                                                        ) : (
-                                                            <span className="text-xs text-neutral-400">
-                                                                No Image
-                                                            </span>
-                                                        )}
-                                                    </TableCell>
-                                                );
-                                            }
-
                                             if (meta.type === 'status') {
-                                                const isActive = value === 'active';
+                                                const isActive =
+                                                    value === 'active';
                                                 return (
                                                     <TableCell key={key}>
                                                         <button
                                                             type="button"
-                                                            onClick={() => handleToggleStatus(page.id)}
+                                                            onClick={() =>
+                                                                handleToggleStatus(
+                                                                    page.id,
+                                                                )
+                                                            }
                                                             className={`relative inline-flex h-6 w-12 items-center rounded-full border border-transparent text-xs font-medium transition-colors ${
                                                                 isActive
                                                                     ? 'bg-emerald-500'
@@ -306,16 +292,35 @@ export default function Index({ title, columns, items, filters }: Props) {
                                         })}
 
                                         <TableCell>
-                                            <div className="flex gap-2">
-                                                <Link href={`/admin/stepper-pages/${page.id}/edit`}>
-                                                    <Button size="sm" variant="outline">
+                                            <div className="flex flex-wrap gap-2">
+                                                <Link
+                                                    href={`/page/${page.page_slug}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                    >
+                                                        View
+                                                    </Button>
+                                                </Link>
+                                                <Link
+                                                    href={`/admin/pages/${page.id}/edit`}
+                                                >
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                    >
                                                         Edit
                                                     </Button>
                                                 </Link>
                                                 <Button
                                                     size="sm"
                                                     variant="destructive"
-                                                    onClick={() => handleDelete(page.id)}
+                                                    onClick={() =>
+                                                        handleDelete(page.id)
+                                                    }
                                                 >
                                                     Delete
                                                 </Button>
@@ -325,9 +330,11 @@ export default function Index({ title, columns, items, filters }: Props) {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={visibleColumns.length + 2}>
+                                    <TableCell
+                                        colSpan={visibleColumns.length + 2}
+                                    >
                                         <div className="py-6 text-center text-sm text-neutral-500">
-                                            No Data Available
+                                            No pages found.
                                         </div>
                                     </TableCell>
                                 </TableRow>
@@ -361,3 +368,4 @@ export default function Index({ title, columns, items, filters }: Props) {
         </AppLayout>
     );
 }
+
