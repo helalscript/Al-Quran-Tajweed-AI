@@ -218,19 +218,19 @@ export default function Index({ title, columns, items, filters }: Props) {
                                             <span>{meta.label}</span>
                                             {(key === 'page_title' ||
                                                 key === 'page_slug') && (
-                                                <button
-                                                    type="button"
-                                                    className="inline-flex items-center gap-1 rounded px-1 py-0.5 text-xs text-neutral-600 hover:bg-neutral-200/60 dark:text-neutral-300 dark:hover:bg-neutral-700/60"
-                                                    onClick={() =>
-                                                        toggleSort(key)
-                                                    }
-                                                >
-                                                    <SortIcon col={key} />
-                                                    <span className="sr-only">
-                                                        Sort
-                                                    </span>
-                                                </button>
-                                            )}
+                                                    <button
+                                                        type="button"
+                                                        className="inline-flex items-center gap-1 rounded px-1 py-0.5 text-xs text-neutral-600 hover:bg-neutral-200/60 dark:text-neutral-300 dark:hover:bg-neutral-700/60"
+                                                        onClick={() =>
+                                                            toggleSort(key)
+                                                        }
+                                                    >
+                                                        <SortIcon col={key} />
+                                                        <span className="sr-only">
+                                                            Sort
+                                                        </span>
+                                                    </button>
+                                                )}
                                         </div>
                                     </TableHead>
                                 ))}
@@ -266,18 +266,16 @@ export default function Index({ title, columns, items, filters }: Props) {
                                                                     page.id,
                                                                 )
                                                             }
-                                                            className={`relative inline-flex h-6 w-12 items-center rounded-full border border-transparent text-xs font-medium transition-colors ${
-                                                                isActive
+                                                            className={`relative inline-flex h-6 w-12 items-center rounded-full border border-transparent text-xs font-medium transition-colors ${isActive
                                                                     ? 'bg-emerald-500'
                                                                     : 'bg-neutral-400'
-                                                            }`}
+                                                                }`}
                                                         >
                                                             <span
-                                                                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
-                                                                    isActive
+                                                                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${isActive
                                                                         ? 'translate-x-6'
                                                                         : 'translate-x-1'
-                                                                }`}
+                                                                    }`}
                                                             />
                                                         </button>
                                                     </TableCell>

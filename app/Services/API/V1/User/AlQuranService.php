@@ -2,6 +2,8 @@
 
 namespace App\Services\API\V1\User;
 
+use App\Models\AppDisplaySetting;
+use App\Models\Edition;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -21,37 +23,55 @@ class AlQuranService
     {
         try {
             return Cache::remember('all_surahs', now()->addMonth(), function () {
-                $apiUrl = "https://api.alquran.cloud/v1/surah";
+                $apiUrl = 'https://api.alquran.cloud/v1/surah';
                 $response = Http::get($apiUrl);
 
                 if ($response->successful()) {
                     return $response->json();
                 } else {
-                    throw new Exception("Failed to fetch surahs from external API.");
+                    throw new Exception('Failed to fetch surahs from external API.');
                 }
             });
         } catch (Exception $e) {
-            Log::error('AlQuranService::getAllSurahs ' . $e->getMessage());
+            Log::error('AlQuranService::getAllSurahs '.$e->getMessage());
             throw $e;
         }
     }
 
-    public function getSurahByNumber(string $number, $editions = "'quran-uthmani','ar.alafasy','bn.bengali'"): mixed
+    public function getSurahByNumber(string $number, string $defaultEdition = 'quran-uthmani'): mixed
     {
         try {
+            $userLanguageEdition = (array) $this->getUserLanguageEdition();
+            $userRecitation = (array) $this->getUserRecitation();
 
-            return Cache::remember('surah_' . $number . '_' . $editions, now()->addMonth(), function () use ($number, $editions) {
-                $apiUrl = "https://api.alquran.cloud/v1/surah/" . $number . "/editions/" . $editions;
-                $response = Http::get($apiUrl);
+            // Merge all editions
+            $allEditions = array_map(function ($e) {
+                return trim($e, "'\" "); // remove any ' or "
+            }, array_merge([$defaultEdition], $userLanguageEdition, $userRecitation));
+            // API requires: edition1,edition2,edition3  (NO single quotes)
+            $editionParam = implode(",", $allEditions);
 
-                if ($response->successful()) {
-                    return $response->json();
-                } else {
-                    throw new Exception("Failed to fetch surah from external API.");
+            return Cache::remember(
+                'surah_'.$number.'_'.md5($editionParam),
+                now()->addMonth(),
+                function () use ($number, $editionParam) {
+
+                    $apiUrl = "https://api.alquran.cloud/v1/surah/$number/editions/$editionParam";
+
+                    // dd($apiUrl); // Check final URL
+
+                    $response = Http::get($apiUrl);
+
+                    if ($response->successful()) {
+                        return $response->json();
+                    }
+
+                    throw new Exception('Failed to fetch surah from external API.');
                 }
-            });
+            );
+
         } catch (Exception $e) {
-            Log::error('AlQuranService::getSurahByNumber' . $e->getMessage());
+            Log::error('AlQuranService::getSurahByNumber - '.$e->getMessage());
             throw $e;
         }
     }
@@ -66,7 +86,7 @@ class AlQuranService
                 for ($i = 1; $i <= 30; $i++) {
                     $response = Http::get("https://api.alquran.cloud/v1/juz/{$i}/quran-uthmani");
 
-                    if (!$response->successful()) {
+                    if (! $response->successful()) {
                         throw new Exception("Failed to fetch juz {$i}");
                     }
 
@@ -99,7 +119,7 @@ class AlQuranService
                 return $juzs;
             });
         } catch (Exception $e) {
-            Log::error('AlQuranService::getAllJuzs ' . $e->getMessage());
+            Log::error('AlQuranService::getAllJuzs '.$e->getMessage());
             throw $e;
         }
     }
@@ -107,27 +127,26 @@ class AlQuranService
     public function getJuzByNumber(string $number)
     {
         try {
-            return Cache::remember('juz_' . $number, now()->addMonth(), function () use ($number) {
-                $apiUrl = "https://api.alquran.cloud/v1/juz/" . $number;
+            return Cache::remember('juz_'.$number, now()->addMonth(), function () use ($number) {
+                $apiUrl = 'https://api.alquran.cloud/v1/juz/'.$number;
                 $response = Http::get($apiUrl);
 
                 if ($response->successful()) {
                     return $response->json();
                 } else {
-                    throw new Exception("Failed to fetch juz from external API.");
+                    throw new Exception('Failed to fetch juz from external API.');
                 }
             });
         } catch (Exception $e) {
-            Log::error('AlQuranService::getJuzByNumber ' . $e->getMessage());
+            Log::error('AlQuranService::getJuzByNumber '.$e->getMessage());
             throw $e;
         }
     }
 
-
     public function getAllSurahsByUserLanguage()
     {
         try {
-            $edition = "bn.bengali";
+            $edition = 'bn.bengali';
             // $edition = $this->getEditionByLanguage($this->user->language_code);
 
             return Cache::remember(
@@ -136,11 +155,11 @@ class AlQuranService
                 function () use ($edition) {
 
                     $response = Http::get(
-                        "https://api.alquran.cloud/v1/surah",
+                        'https://api.alquran.cloud/v1/surah',
                         ['edition' => $edition]
                     );
 
-                    if (!$response->successful()) {
+                    if (! $response->successful()) {
                         throw new Exception('Failed to fetch surahs');
                     }
 
@@ -148,7 +167,7 @@ class AlQuranService
                 }
             );
         } catch (Exception $e) {
-            Log::error('AlQuranService::getAllSurahsByUserLanguage ' . $e->getMessage());
+            Log::error('AlQuranService::getAllSurahsByUserLanguage '.$e->getMessage());
             throw $e;
         }
     }
@@ -163,5 +182,41 @@ class AlQuranService
         ];
 
         return $editionMap[$languageCode] ?? 'en.sahih';
+    }
+
+    private function getUserLanguageEdition()
+    {
+        // get all editions for the user language
+        $editionList = Edition::where('language', $this->user->language_code)
+            ->where('format', 'text')
+            ->get()
+            ->pluck('identifier')
+            ->toArray();
+        // if no editions for the user language, use default language
+        if (empty($editionList)) {
+            $editionList = Edition::where('language', 'en')
+            ->where('format', 'text')->get()
+                ->pluck('identifier')
+                ->toArray();
+        }
+        // get display settings for the user
+        $displaySettings = AppDisplaySetting::where('user_id', $this->user->id)->first();
+        if (empty($displaySettings)) {
+            return $editionList[0];
+        }
+        // check if translation by is in edition list
+        return $selectedEdition = in_array($displaySettings->translation_by, $editionList)
+        ? $displaySettings->translation_by
+        : $editionList[0];
+    }
+
+    private function getUserRecitation()
+    {
+        $recitation = AppDisplaySetting::where('user_id', $this->user->id)->first();
+        if ($recitation) {
+            return $recitation->qari ?? 'ar.abdulbasitmurattal';
+        }
+
+        return 'ar.abdulbasitmurattal';
     }
 }

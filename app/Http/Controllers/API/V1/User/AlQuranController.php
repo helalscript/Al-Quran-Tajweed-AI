@@ -34,7 +34,7 @@ class AlQuranController extends Controller
     /**
      * Display the specified resource.
      */
-    public function getSurahByNumber(string $number,$editions="'quran-uthmani','ar.alafasy','bn.bengali'")
+    public function getSurahByNumber(string $number,$editions="'quran-uthmani'")
     {
         try {
             $surah = $this->alQuranService->getSurahByNumber($number,$editions);
