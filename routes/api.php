@@ -16,6 +16,7 @@ use App\Http\Controllers\API\V1\User\AppDisplaySettingsController;
 use App\Http\Controllers\API\V1\User\AppLanguageController;
 use App\Http\Controllers\API\V1\User\CategoryController;
 use App\Http\Controllers\API\V1\User\DuaDhikrController;
+use App\Http\Controllers\API\V1\User\EditionController;
 use App\Http\Controllers\API\V1\User\FavouriteController;
 use App\Http\Controllers\API\V1\User\MemorizationController;
 use App\Http\Controllers\API\V1\User\NotificationController;
@@ -114,6 +115,9 @@ Route::group(['middleware' => ['auth:api', 'is_user']], function ($router) {
     Route::post('favourites/toggle', [FavouriteController::class, 'toggle']);
     Route::delete('favourites/{id}', [FavouriteController::class, 'destroy']);
 
+    // editions
+    Route::get('editions-translation', [EditionController::class, 'getTranslationEditions']);
+    Route::get('editions-recitation', [EditionController::class, 'getRecitationEditions']);
 });
 
 // this is for admin
