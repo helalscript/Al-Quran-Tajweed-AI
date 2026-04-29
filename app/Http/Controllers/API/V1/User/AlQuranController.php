@@ -85,4 +85,16 @@ class AlQuranController extends Controller
             return Helper::jsonErrorResponse('Failed to fetch surahs', 500);
         }
     }
+
+    public function showTajweedSurah(int $number)
+    {
+        try {
+            $tajweedSurah = $this->alQuranService->showTajweedSurah($number);
+
+            return Helper::jsonResponse(true, 'Tajweed surah fetched successfully', 200, $tajweedSurah);
+        } catch (Exception $e) {
+            Log::error('AlQuranController::showTajweedSurah'.$e->getMessage());
+            return Helper::jsonErrorResponse('Failed to fetch tajweed surah', 500);
+        }
+    }
 }

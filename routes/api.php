@@ -68,6 +68,10 @@ Route::group(['middleware' => ['auth:api', 'is_user']], function ($router) {
     // al quran
     Route::get('al-quran/surahs', [AlQuranController::class, 'getAllSurahs']);
     Route::get('al-quran/surahs/{number}/editions/{editions?}', [AlQuranController::class, 'getSurahByNumber']);
+
+    // tajweed surah
+    Route::get('al-quran/surahs/tajweed/{number}', [AlQuranController::class, 'showTajweedSurah']);
+
     // Juzs
     Route::get('al-quran/juzs', [AlQuranController::class, 'getAllJuzs']);
 

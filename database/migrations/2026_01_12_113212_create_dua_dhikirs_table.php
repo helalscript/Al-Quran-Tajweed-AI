@@ -13,14 +13,17 @@ return new class extends Migration
     {
         Schema::create('dua_dhikirs', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->string('category')->nullable();
-            $table->text('arabic_text')->nullable();
-            $table->text('translation')->nullable();
-            $table->text('description')->nullable();
+            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
+            $table->text('arabic');
+            $table->string('source')->nullable();
             $table->string('image')->nullable();
+            $table->string('audio_url')->nullable();
+            $table->integer('order')->default(0);
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
+            $table->softDeletes();
+            
+            $table->index(['category_id', 'status']);
         });
     }
 

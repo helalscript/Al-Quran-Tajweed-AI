@@ -27,8 +27,7 @@ Route::middleware(['auth', 'role_check'])->group(function () {
         Route::patch('stepper-pages/{stepper_page}/toggle', [StepperPageController::class, 'toggleStatus'])->name('stepper-pages.toggle');
         Route::get('stepper-data', [StepperPageController::class, 'newIndex'])->name('stepper-data');
 
-        Route::get('dua-dhikir', [DuaDhikirController::class, 'index'])->name('dua-dhikir.index');
-        Route::delete('dua-dhikir/{dua_dhikir}', [DuaDhikirController::class, 'destroy'])->name('dua-dhikir.destroy');
+        Route::resource('dua-dhikir', DuaDhikirController::class)->parameters(['dua-dhikir' => 'dua_dhikir']);
         Route::patch('dua-dhikir/{dua_dhikir}/toggle', [DuaDhikirController::class, 'toggleStatus'])->name('dua-dhikir.toggle');
 
         Route::get('users', [UserController::class, 'index'])->name('users.index');

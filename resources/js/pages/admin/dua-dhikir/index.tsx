@@ -34,14 +34,21 @@ interface Paginated<T> {
     total: number;
 }
 
+interface Category {
+    id: number;
+    name: string;
+}
+
 interface Props {
     title: string;
     resource: string;
     columns: Record<string, ColumnMeta>;
     items: Paginated<DuaDhikirItem>;
+    categories: Category[];
     filters: {
         search?: string;
         status?: string;
+        category_id?: string;
     };
 }
 
@@ -54,15 +61,20 @@ export default function DuaDhikirIndex({
     title,
     columns,
     items,
+    categories,
     filters,
 }: Props) {
-    const handleSearchChange = (value: string) => {
+    const applyFilters = (newFilters: Record<string, string | undefined>) => {
         router.get(
             '/admin/dua-dhikir',
-            { search: value },
+            { ...filters, ...newFilters },
             { preserveState: true, replace: true },
         );
     };
+
+    const handleSearchChange = (value: string) => applyFilters({ search: value });
+    const handleCategoryChange = (value: string) => applyFilters({ category_id: value });
+    const handleStatusChange = (value: string) => applyFilters({ status: value });
 
     const handleToggleStatus = (id: number) => {
         router.patch(
@@ -96,17 +108,42 @@ export default function DuaDhikirIndex({
 
             <Card className="m-4 space-y-4 p-4">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div className="w-full md:w-1/3">
-                        <InputGroup>
-                            <InputGroupInput
-                                placeholder="Search..."
-                                defaultValue={filters.search}
-                                onBlur={(e) => handleSearchChange(e.target.value)}
-                            />
-                            <InputGroupAddon>
-                                <Search className="size-4" />
-                            </InputGroupAddon>
-                        </InputGroup>
+                    <div className="flex w-full flex-col gap-4 md:w-2/3 md:flex-row">
+                        <div className="md:w-1/2">
+                            <InputGroup>
+                                <InputGroupInput
+                                    placeholder="Search..."
+                                    defaultValue={filters.search}
+                                    onBlur={(e) => handleSearchChange(e.target.value)}
+                                />
+                                <InputGroupAddon>
+                                    <Search className="size-4" />
+                                </InputGroupAddon>
+                            </InputGroup>
+                        </div>
+                        <div className="md:w-1/4">
+                            <select
+                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                                value={filters.category_id || ''}
+                                onChange={(e) => handleCategoryChange(e.target.value)}
+                            >
+                                <option value="">All Categories</option>
+                                {categories?.map((c) => (
+                                    <option key={c.id} value={c.id}>{c.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="md:w-1/4">
+                            <select
+                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                                value={filters.status || ''}
+                                onChange={(e) => handleStatusChange(e.target.value)}
+                            >
+                                <option value="">All Statuses</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div className="text-right">
@@ -124,7 +161,7 @@ export default function DuaDhikirIndex({
                                 {visibleColumns.map(([key, meta]) => (
                                     <TableHead key={key}>{meta.label}</TableHead>
                                 ))}
-                                <TableHead className="w-[150px]">Actions</TableHead>
+                                <TableHead className="w-[200px]">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
 
@@ -184,6 +221,14 @@ export default function DuaDhikirIndex({
 
                                         <TableCell>
                                             <div className="flex gap-2">
+                                                <Link href={`/admin/dua-dhikir/${item.id}`}>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="secondary"
+                                                    >
+                                                        Show
+                                                    </Button>
+                                                </Link>
                                                 <Link href={`/admin/dua-dhikir/${item.id}/edit`}>
                                                     <Button
                                                         size="sm"

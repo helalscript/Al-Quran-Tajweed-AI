@@ -44,5 +44,7 @@ class DatabaseSeeder extends Seeder
         $this->call(FaqSeeder::class);
         $this->call(AppLanguageSeeder::class);
         $this->call(EditionSeeder::class);
+        $this->call(CategorySeeder::class);
+        $this->call(DuaDhikirSeeder::class);
     }
 }
