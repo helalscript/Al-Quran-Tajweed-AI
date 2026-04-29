@@ -5,6 +5,7 @@ use App\Http\Controllers\Web\Admin\DuaDhikirController;
 use App\Http\Controllers\Web\Admin\DynamicPageController;
 use App\Http\Controllers\Web\Admin\StepperPageController;
 use App\Http\Controllers\Web\Admin\UserController;
+use App\Http\Controllers\Web\Admin\CategoryController;
 use App\Http\Controllers\Web\PageController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -36,6 +37,9 @@ Route::middleware(['auth', 'role_check'])->group(function () {
 
         Route::resource('pages', DynamicPageController::class)->except(['show']);
         Route::patch('pages/{page}/toggle', [DynamicPageController::class, 'toggleStatus'])->name('pages.toggle');
+
+        Route::resource('categories', CategoryController::class)->except(['show']);
+        Route::patch('categories/{category}/toggle', [CategoryController::class, 'toggleStatus'])->name('categories.toggle');
     });
 });
 

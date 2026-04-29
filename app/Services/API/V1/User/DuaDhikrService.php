@@ -3,12 +3,12 @@
 namespace App\Services\API\V1\User;
 
 use App\Models\Category;
-use App\Models\DuaDhikr;
+use App\Models\DuaDhikir;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
-class DuaDhikrService
+class DuaDhikirService
 {
     protected $user;
 
@@ -39,7 +39,7 @@ class DuaDhikrService
                 throw new Exception('Category not found');
             }
 
-            $duas = DuaDhikr::where('category_id', $categoryId)
+            $duas = DuaDhikir::where('category_id', $categoryId)
                 ->where('language_code', $languageCode)
                 ->where('status', 'active')
                 ->orderBy('order', 'asc')
@@ -49,7 +49,7 @@ class DuaDhikrService
             if ($this->user) {
                 $duaIds = $duas->pluck('id')->toArray();
                 $favouriteIds = $this->user->favourites()
-                    ->where('favouritable_type', DuaDhikr::class)
+                    ->where('favouritable_type', DuaDhikir::class)
                     ->whereIn('favouritable_id', $duaIds)
                     ->pluck('favouritable_id')
                     ->toArray();
@@ -69,7 +69,7 @@ class DuaDhikrService
                 'duas' => $duas,
             ];
         } catch (Exception $e) {
-            Log::error("DuaDhikrService::getByCategory" . $e->getMessage());
+            Log::error("DuaDhikirService::getByCategory" . $e->getMessage());
             throw $e;
         }
     }
@@ -95,7 +95,7 @@ class DuaDhikrService
 
             return $this->getByCategory($request, $category->id);
         } catch (Exception $e) {
-            Log::error("DuaDhikrService::getByCategorySlug" . $e->getMessage());
+            Log::error("DuaDhikirService::getByCategorySlug" . $e->getMessage());
             throw $e;
         }
     }
@@ -109,7 +109,7 @@ class DuaDhikrService
     public function show(int $id)
     {
         try {
-            $dua = DuaDhikr::where('id', $id)
+            $dua = DuaDhikir::where('id', $id)
                 ->where('status', 'active')
                 ->with('category')
                 ->first();
@@ -121,7 +121,7 @@ class DuaDhikrService
             // Add favourite status
             if ($this->user) {
                 $isFavourite = $this->user->favourites()
-                    ->where('favouritable_type', DuaDhikr::class)
+                    ->where('favouritable_type', DuaDhikir::class)
                     ->where('favouritable_id', $id)
                     ->exists();
                 
@@ -130,7 +130,7 @@ class DuaDhikrService
 
             return $dua;
         } catch (Exception $e) {
-            Log::error("DuaDhikrService::show" . $e->getMessage());
+            Log::error("DuaDhikirService::show" . $e->getMessage());
             throw $e;
         }
     }
@@ -148,7 +148,7 @@ class DuaDhikrService
             $languageCode = $request->language_code ?? $this->user->language_code ?? 'en';
             $query = $request->query ?? '';
 
-            $duas = DuaDhikr::where('status', 'active')
+            $duas = DuaDhikir::where('status', 'active')
                 ->where('language_code', $languageCode)
                 ->where(function ($q) use ($query) {
                     $q->where('title', 'like', "%{$query}%")
@@ -164,7 +164,7 @@ class DuaDhikrService
             if ($this->user) {
                 $duaIds = $duas->pluck('id')->toArray();
                 $favouriteIds = $this->user->favourites()
-                    ->where('favouritable_type', DuaDhikr::class)
+                    ->where('favouritable_type', DuaDhikir::class)
                     ->whereIn('favouritable_id', $duaIds)
                     ->pluck('favouritable_id')
                     ->toArray();
@@ -177,7 +177,7 @@ class DuaDhikrService
 
             return $duas;
         } catch (Exception $e) {
-            Log::error("DuaDhikrService::search" . $e->getMessage());
+            Log::error("DuaDhikirService::search" . $e->getMessage());
             throw $e;
         }
     }

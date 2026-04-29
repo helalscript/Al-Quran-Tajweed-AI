@@ -36,7 +36,7 @@ class CategoryService
                     $query->where('name', 'like', "%{$search}%")
                         ->orWhere('slug', 'like', "%{$search}%");
                 })
-                ->withCount('duaDhikrs')
+                ->withCount('duaDhikirs')
                 ->orderBy('order', 'asc')
                 ->paginate($perPage);
 
@@ -54,7 +54,7 @@ class CategoryService
             //         'slug' => $category->slug,
             //         'type' => $category->type,
             //         'order' => $category->order,
-            //         'duas_count' => $category->duaDhikrs()->where('status', 'active')->count(),
+            //         'duas_count' => $category->duaDhikirs()->where('status', 'active')->count(),
             //     ];
             // });
 
@@ -78,8 +78,8 @@ class CategoryService
                 ->select('id', 'name', 'slug', 'type', 'order')
                 ->where('type', 'dua')
                 ->where('status', 'active')
-                ->withCount('duaDhikrs')
-                ->with(['duaDhikrs'=>function($query) {
+                ->withCount('duaDhikirs')
+                ->with(['duaDhikirs'=>function($query) {
                     $query->where('status', 'active')
                     ->select('id','category_id', 'title','order');
                 }])
@@ -108,8 +108,8 @@ class CategoryService
             $category = Category::where('slug', $slug)
                 ->where('type', 'dua')
                 ->where('status', 'active')
-                ->withCount('duaDhikrs')
-                ->with('duaDhikrs')
+                ->withCount('duaDhikirs')
+                ->with('duaDhikirs')
                 ->first();
 
             if (!$category) {

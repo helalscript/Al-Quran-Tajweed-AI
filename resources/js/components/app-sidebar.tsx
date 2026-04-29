@@ -51,6 +51,11 @@ const mainNavItems: NavItem[] = [
         href: '/admin/pages',
         icon: FileText,
     },
+    {
+        title: 'Categories',
+        href: '/admin/categories',
+        icon: Folder,
+    },
 ];
 
 const footerNavItems: NavItem[] = [
