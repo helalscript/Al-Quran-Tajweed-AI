@@ -40,23 +40,17 @@ class CategoryService
                 ->orderBy('order', 'asc')
                 ->paginate($perPage);
 
-            // // Transform categories to include localized name
-            // $categories->getCollection()->transform(function ($category) use ($languageCode) {
-            //     $translations = $category->translations ?? [];
-            //     $localizedCategories = $translations[$languageCode] ?? $translations['en'] ?? [];
-                
-            //     // Find matching category in translations
-            //     $localizedCategory = collect($localizedCategories)->firstWhere('slug', $category->slug);
-                
-            //     return [
-            //         'id' => $category->id,
-            //         'name' => $localizedCategory['name'] ?? $category->name,
-            //         'slug' => $category->slug,
-            //         'type' => $category->type,
-            //         'order' => $category->order,
-            //         'duas_count' => $category->duaDhikirs()->where('status', 'active')->count(),
-            //     ];
-            // });
+            // Transform categories to include localized name if needed, and fix counts
+            $categories->getCollection()->transform(function ($category) use ($languageCode) {
+                return [
+                    'id' => $category->id,
+                    'name' => $category->name, // Categories themselves might need translations later, but for now they have a name
+                    'slug' => $category->slug,
+                    'type' => $category->type,
+                    'order' => $category->order,
+                    'duas_count' => $category->dua_dhikirs_count,
+                ];
+            });
 
             return $categories;
         } catch (Exception $e) {
@@ -74,16 +68,34 @@ class CategoryService
     public function show(int $id)
     {
         try {
+            $languageCode = request()->language_code ?? $this->user->language_code ?? 'en';
+
             $category = Category::where('id', $id)
                 ->select('id', 'name', 'slug', 'type', 'order')
                 ->where('type', 'dua')
                 ->where('status', 'active')
-                ->withCount('duaDhikirs')
-                ->with(['duaDhikirs'=>function($query) {
+                ->withCount(['duaDhikirs' => function($query) {
+                    $query->where('status', 'active');
+                }])
+                ->with(['duaDhikirs' => function($query) use ($languageCode) {
                     $query->where('status', 'active')
-                    ->select('id','category_id', 'title','order');
+                        ->select('id', 'category_id', 'order')
+                        ->with(['translations' => function($q) use ($languageCode) {
+                            $q->where('language_code', $languageCode)
+                              ->select('id', 'dua_dhikir_id', 'title');
+                        }]);
                 }])
                 ->first();
+
+            if ($category) {
+                // Flatten translations for easier API consumption
+                $category->duaDhikirs->transform(function($dua) {
+                    $translation = $dua->translations->first();
+                    $dua->title = $translation ? $translation->title : null;
+                    unset($dua->translations);
+                    return $dua;
+                });
+            }
 
             if (!$category) {
                 throw new Exception('Category not found');
@@ -105,12 +117,37 @@ class CategoryService
     public function getBySlug(string $slug)
     {
         try {
+            $languageCode = request()->language_code ?? $this->user->language_code ?? 'en';
+
             $category = Category::where('slug', $slug)
                 ->where('type', 'dua')
                 ->where('status', 'active')
-                ->withCount('duaDhikirs')
-                ->with('duaDhikirs')
+                ->withCount(['duaDhikirs' => function($query) {
+                    $query->where('status', 'active');
+                }])
+                ->with(['duaDhikirs' => function($query) use ($languageCode) {
+                    $query->where('status', 'active')
+                        ->with(['translations' => function($q) use ($languageCode) {
+                            $q->where('language_code', $languageCode);
+                        }]);
+                }])
                 ->first();
+
+            if ($category) {
+                // Flatten translations for easier API consumption
+                $category->duaDhikirs->transform(function($dua) {
+                    $translation = $dua->translations->first();
+                    if ($translation) {
+                        $dua->title = $translation->title;
+                        $dua->translation = $translation->translation;
+                        $dua->notes = $translation->notes;
+                        $dua->benefits = $translation->benefits;
+                        $dua->fawaid = $translation->fawaid;
+                    }
+                    unset($dua->translations);
+                    return $dua;
+                });
+            }
 
             if (!$category) {
                 throw new Exception('Category not found');

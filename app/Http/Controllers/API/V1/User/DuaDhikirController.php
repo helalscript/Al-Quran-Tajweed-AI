@@ -4,14 +4,14 @@ namespace App\Http\Controllers\API\V1\User;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
-use App\Services\API\V1\User\DuaDhikrService;
+use App\Services\API\V1\User\DuaDhikirService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-class  DuaDhikrController extends Controller
+class  DuaDhikirController extends Controller
 {
-    public function __construct(protected DuaDhikrService $duaDhikrService)
+    public function __construct(protected DuaDhikirService $duaDhikrService)
     {
         //
     }

@@ -15,7 +15,7 @@ use App\Http\Controllers\API\V1\User\AlQuranController;
 use App\Http\Controllers\API\V1\User\AppDisplaySettingsController;
 use App\Http\Controllers\API\V1\User\AppLanguageController;
 use App\Http\Controllers\API\V1\User\CategoryController;
-use App\Http\Controllers\API\V1\User\DuaDhikrController;
+use App\Http\Controllers\API\V1\User\DuaDhikirController;
 use App\Http\Controllers\API\V1\User\EditionController;
 use App\Http\Controllers\API\V1\User\FavouriteController;
 use App\Http\Controllers\API\V1\User\MemorizationController;
@@ -108,10 +108,10 @@ Route::group(['middleware' => ['auth:api', 'is_user']], function ($router) {
     Route::get('dua/categories/slug/{slug}', [CategoryController::class, 'getBySlug']);
 
     // dua dhikrs
-    Route::get('dua/categories/{categoryId}/duas', [DuaDhikrController::class, 'getByCategory']);
-    Route::get('dua/categories/slug/{slug}/duas', [DuaDhikrController::class, 'getByCategorySlug']);
-    Route::get('dua/{id}', [DuaDhikrController::class, 'show']);
-    Route::get('dua/search', [DuaDhikrController::class, 'search']);
+    Route::get('dua/categories/{categoryId}/duas', [DuaDhikirController::class, 'getByCategory']);
+    Route::get('dua/categories/slug/{slug}/duas', [DuaDhikirController::class, 'getByCategorySlug']);
+    Route::get('dua/{id}', [DuaDhikirController::class, 'show']);
+    Route::get('dua/search', [DuaDhikirController::class, 'search']);
 
     // favourites
     Route::get('favourites', [FavouriteController::class, 'index']);
