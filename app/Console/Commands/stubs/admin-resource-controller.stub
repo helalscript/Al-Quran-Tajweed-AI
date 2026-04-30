@@ -1,0 +1,37 @@
+<?php
+
+namespace {{ namespace }};
+
+use {{ modelNamespace }};
+
+class {{ class }} extends BaseAdminResourceController
+{
+    protected function resourceConfig(): array
+    {
+        return [
+            'name' => '{{ resourceName }}',
+            'title' => '{{ resourceTitle }}',
+            'model' => {{ modelBase }}::class,
+            'index_view' => 'admin/{{ resourceName }}/index',
+            'status_column' => 'status',
+            'status_active' => 'active',
+            'status_inactive' => 'inactive',
+            'columns' => [
+                'title' => [
+                    'label' => 'Title',
+                    'searchable' => true,
+                    'filterable' => false,
+                    'visible' => true,
+                ],
+                'status' => [
+                    'label' => 'Status',
+                    'type' => 'status',
+                    'searchable' => false,
+                    'filterable' => true,
+                    'visible' => true,
+                ],
+            ],
+        ];
+    }
+}
+

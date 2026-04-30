@@ -5,6 +5,7 @@ use App\Http\Controllers\Web\Admin\DuaDhikirController;
 use App\Http\Controllers\Web\Admin\DynamicPageController;
 use App\Http\Controllers\Web\Admin\StepperPageController;
 use App\Http\Controllers\Web\Admin\UserController;
+use App\Http\Controllers\Web\Admin\CategoryController;
 use App\Http\Controllers\Web\PageController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -27,8 +28,7 @@ Route::middleware(['auth', 'role_check'])->group(function () {
         Route::patch('stepper-pages/{stepper_page}/toggle', [StepperPageController::class, 'toggleStatus'])->name('stepper-pages.toggle');
         Route::get('stepper-data', [StepperPageController::class, 'newIndex'])->name('stepper-data');
 
-        Route::get('dua-dhikir', [DuaDhikirController::class, 'index'])->name('dua-dhikir.index');
-        Route::delete('dua-dhikir/{dua_dhikir}', [DuaDhikirController::class, 'destroy'])->name('dua-dhikir.destroy');
+        Route::resource('dua-dhikir', DuaDhikirController::class)->parameters(['dua-dhikir' => 'dua_dhikir']);
         Route::patch('dua-dhikir/{dua_dhikir}/toggle', [DuaDhikirController::class, 'toggleStatus'])->name('dua-dhikir.toggle');
 
         Route::get('users', [UserController::class, 'index'])->name('users.index');
@@ -37,6 +37,9 @@ Route::middleware(['auth', 'role_check'])->group(function () {
 
         Route::resource('pages', DynamicPageController::class)->except(['show']);
         Route::patch('pages/{page}/toggle', [DynamicPageController::class, 'toggleStatus'])->name('pages.toggle');
+
+        Route::resource('categories', CategoryController::class)->except(['show']);
+        Route::patch('categories/{category}/toggle', [CategoryController::class, 'toggleStatus'])->name('categories.toggle');
     });
 });
 

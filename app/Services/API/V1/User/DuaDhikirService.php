@@ -3,12 +3,12 @@
 namespace App\Services\API\V1\User;
 
 use App\Models\Category;
-use App\Models\DuaDhikr;
+use App\Models\DuaDhikir;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
-class DuaDhikrService
+class DuaDhikirService
 {
     protected $user;
 
@@ -39,17 +39,35 @@ class DuaDhikrService
                 throw new Exception('Category not found');
             }
 
-            $duas = DuaDhikr::where('category_id', $categoryId)
-                ->where('language_code', $languageCode)
+            $duas = DuaDhikir::where('category_id', $categoryId)
                 ->where('status', 'active')
+                ->with([
+                    'translations' => function ($query) use ($languageCode) {
+                        $query->where('language_code', $languageCode);
+                    }
+                ])
                 ->orderBy('order', 'asc')
                 ->paginate($perPage);
+
+            // Flatten translations
+            $duas->getCollection()->transform(function ($dua) {
+                $translation = $dua->translations->first();
+                if ($translation) {
+                    $dua->title = $translation->title;
+                    $dua->translation = $translation->translation;
+                    $dua->notes = $translation->notes;
+                    $dua->benefits = $translation->benefits;
+                    $dua->fawaid = $translation->fawaid;
+                }
+                unset($dua->translations);
+                return $dua;
+            });
 
             // Add favourite status for each dua
             if ($this->user) {
                 $duaIds = $duas->pluck('id')->toArray();
                 $favouriteIds = $this->user->favourites()
-                    ->where('favouritable_type', DuaDhikr::class)
+                    ->where('favouritable_type', DuaDhikir::class)
                     ->whereIn('favouritable_id', $duaIds)
                     ->pluck('favouritable_id')
                     ->toArray();
@@ -69,7 +87,7 @@ class DuaDhikrService
                 'duas' => $duas,
             ];
         } catch (Exception $e) {
-            Log::error("DuaDhikrService::getByCategory" . $e->getMessage());
+            Log::error("DuaDhikirService::getByCategory" . $e->getMessage());
             throw $e;
         }
     }
@@ -95,7 +113,7 @@ class DuaDhikrService
 
             return $this->getByCategory($request, $category->id);
         } catch (Exception $e) {
-            Log::error("DuaDhikrService::getByCategorySlug" . $e->getMessage());
+            Log::error("DuaDhikirService::getByCategorySlug" . $e->getMessage());
             throw $e;
         }
     }
@@ -109,28 +127,48 @@ class DuaDhikrService
     public function show(int $id)
     {
         try {
-            $dua = DuaDhikr::where('id', $id)
+            $languageCode = $this->user->language_code ?? 'en';
+
+            $dua = DuaDhikir::where('id', $id)
                 ->where('status', 'active')
-                ->with('category')
+                ->with([
+                    'category',
+                    'translations' => function ($query) use ($languageCode) {
+                        $query->whereIn('language_code', [$languageCode, 'en'])
+                            ->orderByRaw("FIELD(language_code, ?, 'en')", [$languageCode]);
+                    }
+                ])
                 ->first();
 
             if (!$dua) {
                 throw new Exception('Dua not found');
             }
 
-            // Add favourite status
+            // Pick translation (priority: user lang → en)
+            $translation = $dua->translations->first();
+
+            if ($translation) {
+                $dua->title = $translation->title;
+                $dua->translation = $translation->translation;
+                $dua->notes = $translation->notes;
+                $dua->benefits = $translation->benefits;
+                $dua->fawaid = $translation->fawaid;
+            }
+
+            unset($dua->translations);
+
+            // Favourite status
             if ($this->user) {
-                $isFavourite = $this->user->favourites()
-                    ->where('favouritable_type', DuaDhikr::class)
+                $dua->is_favourite = $this->user->favourites()
+                    ->where('favouritable_type', DuaDhikir::class)
                     ->where('favouritable_id', $id)
                     ->exists();
-                
-                $dua->is_favourite = $isFavourite;
             }
 
             return $dua;
+
         } catch (Exception $e) {
-            Log::error("DuaDhikrService::show" . $e->getMessage());
+            Log::error("DuaDhikirService::show: " . $e->getMessage());
             throw $e;
         }
     }
@@ -148,23 +186,47 @@ class DuaDhikrService
             $languageCode = $request->language_code ?? $this->user->language_code ?? 'en';
             $query = $request->query ?? '';
 
-            $duas = DuaDhikr::where('status', 'active')
-                ->where('language_code', $languageCode)
-                ->where(function ($q) use ($query) {
-                    $q->where('title', 'like', "%{$query}%")
-                        ->orWhere('arabic', 'like', "%{$query}%")
-                        ->orWhere('latin', 'like', "%{$query}%")
-                        ->orWhere('translation', 'like', "%{$query}%");
+            $duas = DuaDhikir::where('status', 'active')
+                ->where(function ($q) use ($query, $languageCode) {
+                    $q->whereHas('translations', function ($sub) use ($query, $languageCode) {
+                        $sub->where('language_code', $languageCode)
+                            ->where(function ($inner) use ($query) {
+                                $inner->where('title', 'like', "%{$query}%")
+                                    ->orWhere('translation', 'like', "%{$query}%")
+                                    ->orWhere('notes', 'like', "%{$query}%")
+                                    ->orWhere('benefits', 'like', "%{$query}%");
+                            });
+                    })
+                        ->orWhere('arabic', 'like', "%{$query}%");
                 })
-                ->with('category')
+                ->with([
+                    'category',
+                    'translations' => function ($q) use ($languageCode) {
+                        $q->where('language_code', $languageCode);
+                    }
+                ])
                 ->orderBy('order', 'asc')
                 ->paginate($perPage);
+
+            // Flatten translations
+            $duas->getCollection()->transform(function ($dua) {
+                $translation = $dua->translations->first();
+                if ($translation) {
+                    $dua->title = $translation->title;
+                    $dua->translation = $translation->translation;
+                    $dua->notes = $translation->notes;
+                    $dua->benefits = $translation->benefits;
+                    $dua->fawaid = $translation->fawaid;
+                }
+                unset($dua->translations);
+                return $dua;
+            });
 
             // Add favourite status
             if ($this->user) {
                 $duaIds = $duas->pluck('id')->toArray();
                 $favouriteIds = $this->user->favourites()
-                    ->where('favouritable_type', DuaDhikr::class)
+                    ->where('favouritable_type', DuaDhikir::class)
                     ->whereIn('favouritable_id', $duaIds)
                     ->pluck('favouritable_id')
                     ->toArray();
@@ -177,7 +239,7 @@ class DuaDhikrService
 
             return $duas;
         } catch (Exception $e) {
-            Log::error("DuaDhikrService::search" . $e->getMessage());
+            Log::error("DuaDhikirService::search" . $e->getMessage());
             throw $e;
         }
     }

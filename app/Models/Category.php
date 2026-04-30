@@ -36,9 +36,9 @@ class Category extends Model
     /**
      * Get all dua dhikrs for this category
      */
-    public function duaDhikrs(): HasMany
+    public function duaDhikirs(): HasMany
     {
-        return $this->hasMany(DuaDhikr::class);
+        return $this->hasMany(DuaDhikir::class);
     }
 
     /**
