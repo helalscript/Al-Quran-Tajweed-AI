@@ -10,8 +10,15 @@ use App\Http\Controllers\Web\PageController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+use Illuminate\Foundation\Inspiring;
+
 Route::get('/', function () {
-    return Inertia::render('welcome');
+    $quote = Inspiring::quote();
+    $cleanQuote = preg_replace('/<[^>]*>/', '', $quote);
+    
+    return Inertia::render('welcome', [
+        'quote' => $cleanQuote,
+    ]);
 })->name('home');
 // Route::get('/', function () {
 //     return redirect()->route('login');
