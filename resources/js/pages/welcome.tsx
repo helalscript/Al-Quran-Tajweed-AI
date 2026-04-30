@@ -33,7 +33,33 @@ export default function Welcome({ quote }: { quote: string }) {
     // Local state to control visibility
     const [visible, setVisible] = useState(!!message);
 
-    // Hide after 3 seconds
+    // Custom Cursor State
+    const [mousePos, setMousePos] = useState({ x: -100, y: -100 });
+    const [isHovering, setIsHovering] = useState(false);
+    const [isPressed, setIsPressed] = useState(false);
+
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            setMousePos({ x: e.clientX, y: e.clientY });
+            const target = e.target as HTMLElement;
+            setIsHovering(!!target.closest('button, a, [role="button"]'));
+        };
+
+        const handleMouseDown = () => setIsPressed(true);
+        const handleMouseUp = () => setIsPressed(false);
+
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mousedown', handleMouseDown);
+        window.addEventListener('mouseup', handleMouseUp);
+        
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mousedown', handleMouseDown);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, []);
+
+    // Hide flash after 3 seconds
     useEffect(() => {
         if (message) {
             setVisible(true);
@@ -43,8 +69,20 @@ export default function Welcome({ quote }: { quote: string }) {
     }, [message]);
 
     return (
-        <div className="relative min-h-screen flex flex-col items-center justify-center bg-background overflow-hidden selection:bg-primary/30">
+        <div className="relative min-h-screen flex flex-col items-center justify-center bg-background overflow-hidden selection:bg-primary/30 cursor-none">
             <Head title="Welcome" />
+
+            {/* Pro Interactive Cursor */}
+            <div 
+                className="fixed top-0 left-0 w-1 h-1 bg-white rounded-full pointer-events-none z-[9999] -translate-x-1/2 -translate-y-1/2 mix-blend-difference transition-transform duration-0 hidden lg:block"
+                style={{ left: mousePos.x, top: mousePos.y }}
+            />
+            <div 
+                className={`fixed top-0 left-0 w-12 h-12 border border-white rounded-full pointer-events-none z-[9998] -translate-x-1/2 -translate-y-1/2 mix-blend-difference transition-all duration-[400ms] ease-out hidden lg:block ${
+                    isHovering ? 'scale-[1.5] bg-white/10' : 'scale-100'
+                } ${isPressed ? 'scale-[0.8]' : ''}`}
+                style={{ left: mousePos.x, top: mousePos.y }}
+            />
 
             {/* Premium Animated Background Elements */}
             <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-gradient-to-br from-indigo-500/20 to-transparent rounded-full blur-[120px] animate-pulse duration-[10000ms]" />
