@@ -34,7 +34,7 @@ class Favourite extends Model
     }
 
     /**
-     * Get the parent favouritable model (Category or DuaDhikr)
+     * Get the parent favouritable model (Category or DuaDhikir)
      */
     public function favouritable(): MorphTo
     {

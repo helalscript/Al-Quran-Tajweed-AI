@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\V1\User;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
-use App\Models\DuaDhikr;
+use App\Models\DuaDhikir;
 use App\Services\API\V1\User\FavouriteService;
 use Exception;
 use Illuminate\Http\Request;

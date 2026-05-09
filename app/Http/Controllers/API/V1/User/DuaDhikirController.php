@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 class  DuaDhikirController extends Controller
 {
-    public function __construct(protected DuaDhikirService $duaDhikrService)
+    public function __construct(protected DuaDhikirService $duaDhikirService)
     {
         //
     }
@@ -22,11 +22,11 @@ class  DuaDhikirController extends Controller
     public function getByCategory(Request $request, string $categoryId)
     {
         try {
-            $result = $this->duaDhikrService->getByCategory($request, (int) $categoryId);
+            $result = $this->duaDhikirService->getByCategory($request, (int) $categoryId);
 
             return Helper::jsonResponse(true, 'Duas fetched successfully', 200, $result);
         } catch (Exception $e) {
-            Log::error('DuaDhikrController::getByCategory' . $e->getMessage());
+            Log::error('DuaDhikirController::getByCategory' . $e->getMessage());
 
             return Helper::jsonErrorResponse($e->getMessage(), 500);
         }
@@ -38,11 +38,11 @@ class  DuaDhikirController extends Controller
     public function getByCategorySlug(Request $request, string $slug)
     {
         try {
-            $result = $this->duaDhikrService->getByCategorySlug($request, $slug);
+            $result = $this->duaDhikirService->getByCategorySlug($request, $slug);
 
             return Helper::jsonResponse(true, 'Duas fetched successfully', 200, $result, true);
         } catch (Exception $e) {
-            Log::error('DuaDhikrController::getByCategorySlug' . $e->getMessage());
+            Log::error('DuaDhikirController::getByCategorySlug' . $e->getMessage());
 
             return Helper::jsonErrorResponse($e->getMessage(), 500);
         }
@@ -54,11 +54,11 @@ class  DuaDhikirController extends Controller
     public function show(string $id)
     {
         try {
-            $dua = $this->duaDhikrService->show((int) $id);
+            $dua = $this->duaDhikirService->show((int) $id);
 
             return Helper::jsonResponse(true, 'Dua fetched successfully', 200, $dua);
         } catch (Exception $e) {
-            Log::error('DuaDhikrController::show' . $e->getMessage());
+            Log::error('DuaDhikirController::show' . $e->getMessage());
 
             return Helper::jsonErrorResponse($e->getMessage(), 500);
         }
@@ -70,11 +70,11 @@ class  DuaDhikirController extends Controller
     public function search(Request $request)
     {
         try {
-            $duas = $this->duaDhikrService->search($request);
+            $duas = $this->duaDhikirService->search($request);
 
             return Helper::jsonResponse(true, 'Duas fetched successfully', 200, $duas, true);
         } catch (Exception $e) {
-            Log::error('DuaDhikrController::search' . $e->getMessage());
+            Log::error('DuaDhikirController::search' . $e->getMessage());
 
             return Helper::jsonErrorResponse($e->getMessage(), 500);
         }
