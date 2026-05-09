@@ -3,7 +3,7 @@
 namespace App\Services\API\V1\User;
 
 use App\Models\Category;
-use App\Models\DuaDhikr;
+use App\Models\DuaDhikir;
 use App\Models\Favourite;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -39,7 +39,7 @@ class FavouriteService
             if ($type === 'category') {
                 $query->where('favouritable_type', Category::class);
             } elseif ($type === 'dua_dhikr') {
-                $query->where('favouritable_type', DuaDhikr::class);
+                $query->where('favouritable_type', DuaDhikir::class);
             }
 
             $favourites = $query->orderBy('created_at', 'desc')->paginate($perPage);
@@ -48,7 +48,7 @@ class FavouriteService
             $favourites->getCollection()->transform(function ($favourite) {
                 $favouritable = $favourite->favouritable;
 
-                if ($favouritable instanceof DuaDhikr) {
+                if ($favouritable instanceof DuaDhikir) {
                     return [
                         'id' => $favourite->id,
                         'type' => 'dua_dhikr',
@@ -74,7 +74,7 @@ class FavouriteService
                             'id' => $favouritable->id,
                             'name' => $favouritable->name,
                             'slug' => $favouritable->slug,
-                            'duas_count' => $favouritable->duaDhikrs()->where('status', 'active')->count(),
+                            'duas_count' => $favouritable->duaDhikirs()->where('status', 'active')->count(),
                         ],
                         'created_at' => $favourite->created_at,
                     ];
@@ -102,11 +102,11 @@ class FavouriteService
                 throw new Exception('User not authenticated');
             }
 
-            $favouritableType = $validatedData['favouritable_type'] === 'category' ? Category::class : DuaDhikr::class;
+            $favouritableType = $validatedData['favouritable_type'] === 'category' ? Category::class : DuaDhikir::class;
             $favouritableId = $validatedData['favouritable_id'];
 
             // Validate favouritable type
-            $allowedTypes = [Category::class, DuaDhikr::class];
+            $allowedTypes = [Category::class, DuaDhikir::class];
             if (! in_array($favouritableType, $allowedTypes)) {
                 throw new Exception('Invalid favouritable type');
             }
@@ -181,7 +181,7 @@ class FavouriteService
                 throw new Exception('User not authenticated');
             }
 
-            $favouritableType = $validatedData['favouritable_type'] === 'category' ? Category::class : DuaDhikr::class;
+            $favouritableType = $validatedData['favouritable_type'] === 'category' ? Category::class : DuaDhikir::class;
             $favouritableId = $validatedData['favouritable_id'];
 
             $favourite = Favourite::where('user_id', $this->user->id)
