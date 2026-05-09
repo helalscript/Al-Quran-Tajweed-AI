@@ -42,6 +42,7 @@ class User extends Authenticatable implements JWTSubject
         'language_code',
         'timezone',
         'status',
+        'delete_token',
     ];
 
     /**
@@ -81,6 +82,7 @@ class User extends Authenticatable implements JWTSubject
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
+            'delete_token' => 'string',
         ];
     }
 

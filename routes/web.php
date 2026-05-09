@@ -7,6 +7,7 @@ use App\Http\Controllers\Web\Admin\StepperPageController;
 use App\Http\Controllers\Web\Admin\UserController;
 use App\Http\Controllers\Web\Admin\CategoryController;
 use App\Http\Controllers\Web\PageController;
+use App\Http\Controllers\Web\PlayStoreRelatedController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -49,6 +50,21 @@ Route::middleware(['auth', 'role_check'])->group(function () {
         Route::patch('categories/{category}/toggle', [CategoryController::class, 'toggleStatus'])->name('categories.toggle');
     });
 });
+
+// app related routes
+Route::get('/app/auth-user/login', [PlayStoreRelatedController::class, 'showLoginForm']);
+Route::post('/app/auth-user/login', [PlayStoreRelatedController::class, 'login'])->name('app.user.login');
+
+Route::get('/app/auth-user/dashboard', [PlayStoreRelatedController::class, 'dashboard'])->name('app.user.dashboard');
+Route::post('/app/auth-user/logout', [PlayStoreRelatedController::class, 'destroy'])->name('app.user.logout');
+Route::get('/account/delete/confirm/{token}', [PlayStoreRelatedController::class, 'confirmAccountDeletion'])
+        ->name('account.delete.confirmation')
+        ->middleware('signed');
+Route::get('/app/auth-user/delete-account', [PlayStoreRelatedController::class, 'deleteAccount'])
+        ->name('app.user.deleteAccount');
+Route::get('/account/delete-confirm', [PlayStoreRelatedController::class, 'deleteAccountConfirm'])->name('app.user.deleteAccountConfirm');
+Route::get('/confirm/delete/account', [PlayStoreRelatedController::class, 'ConfirmDeleteAccount'])->name('confirm.delete.account');
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
