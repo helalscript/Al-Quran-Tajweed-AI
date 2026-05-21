@@ -115,17 +115,25 @@ class UserController extends Controller
             // Get the authenticated user
             $user = User::findOrFail(auth('api')->id());
 
-            // If the user has an avatar, attempt to delete it
-            if (!empty($user->avatar)) {
-                // Ensure that the file exists before attempting to delete
-                $avatarPath = public_path($user->avatar);
-                if (file_exists($avatarPath)) {
-                    Helper::fileDelete($avatarPath);
-                }
-            }
+            // // If the user has an avatar, attempt to delete it
+            // if (!empty($user->avatar)) {
+            //     // Ensure that the file exists before attempting to delete
+            //     $avatarPath = public_path($user->avatar);
+            //     if (file_exists($avatarPath)) {
+            //         Helper::fileDelete($avatarPath);
+            //     }
+            // }
 
-            // Soft delete the user (if using SoftDeletes)
-            $user->delete();
+            // // Soft delete the user (if using SoftDeletes)
+            // $user->delete();
+
+            // Update email with timestamp
+            $timestamp = time();
+
+            $user->update([
+                'email' => $user->email.'_'.$timestamp,
+                'status' => 'inactive',
+            ]);
 
             // Return success response
             return Helper::jsonResponse(true, 'Profile deleted successfully', 200);
