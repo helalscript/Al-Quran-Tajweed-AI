@@ -69,3 +69,30 @@ Route::get('/confirm/delete/account', [PlayStoreRelatedController::class, 'Confi
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
 
+
+
+// Route::get('/send-test-mail', function () {
+//     try {
+//         $to = 'siboxev365@ameady.com';
+
+//         Mail::raw(
+//             'Test mail from Laravel + Brevo API. Time: ' . now(),
+//             function ($message) use ($to) {
+//                 $message->to($to)
+//                         ->subject('Laravel Brevo Test — ' . now());
+//             }
+//         );
+
+//         return response()->json([
+//             'status'  => 'success',
+//             'message' => 'Email sent to ' . $to,
+//             'time'    => now()->toDateTimeString(),
+//         ], 200);
+
+//     } catch (\Exception $e) {
+//         return response()->json([
+//             'status' => 'failed',
+//             'error'  => $e->getMessage(),
+//         ], 500);
+//     }
+// });
