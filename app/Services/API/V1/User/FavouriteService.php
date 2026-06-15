@@ -33,13 +33,39 @@ class FavouriteService
 
             $perPage = $request->per_page ?? 25;
             $type = $request->type ?? null; // 'category' or 'dua_dhikr'
+            $languageCode = $request->language_code ?? $this->user->language_code ?? 'en';
 
-            $query = $this->user->favourites()->with('favouritable');
+            $query = $this->user->favourites();
 
             if ($type === 'category') {
-                $query->where('favouritable_type', Category::class);
+                $query->where('favouritable_type', Category::class)
+                    ->with('favouritable');
             } elseif ($type === 'dua_dhikr') {
-                $query->where('favouritable_type', DuaDhikir::class);
+                $query->where('favouritable_type', DuaDhikir::class)
+                    ->with([
+                        'favouritable' => function ($q) use ($languageCode) {
+                            $q->with([
+                                'category',
+                                'translations' => function ($qt) use ($languageCode) {
+                                    $qt->where('language_code', $languageCode);
+                                }
+                            ]);
+                        }
+                    ]);
+            } else {
+                $query->with([
+                    'favouritable' => function ($morphTo) use ($languageCode) {
+                        $morphTo->morphWith([
+                            DuaDhikir::class => [
+                                'category',
+                                'translations' => function ($q) use ($languageCode) {
+                                    $q->where('language_code', $languageCode);
+                                }
+                            ],
+                            Category::class => []
+                        ]);
+                    }
+                ]);
             }
 
             $favourites = $query->orderBy('created_at', 'desc')->paginate($perPage);
@@ -49,15 +75,15 @@ class FavouriteService
                 $favouritable = $favourite->favouritable;
 
                 if ($favouritable instanceof DuaDhikir) {
+                    $translation = $favouritable->translations->first();
                     return [
                         'id' => $favourite->id,
                         'type' => 'dua_dhikr',
                         'dua' => [
                             'id' => $favouritable->id,
-                            'title' => $favouritable->title,
+                            'title' => $translation ? $translation->title : null,
                             'arabic' => $favouritable->arabic,
-                            'latin' => $favouritable->latin,
-                            'translation' => $favouritable->translation,
+                            'translation' => $translation ? $translation->translation : null,
                             'category' => [
                                 'id' => $favouritable->category->id,
                                 'name' => $favouritable->category->name,

@@ -29,7 +29,7 @@ import { useState } from 'react';
 
 interface ColumnMeta {
     label: string;
-    type?: 'status';
+    type?: 'status' | 'image';
     visible?: boolean;
 }
 
@@ -39,6 +39,7 @@ interface CategoryItem {
     type: string;
     order: number;
     status: string;
+    image?: string | null;
 }
 
 interface Paginated<T> {
@@ -140,6 +141,12 @@ export default function Index({ title, columns, items, filters }: Props) {
             preserveScroll: true,
             preserveState: true,
         });
+    };
+
+    const getImageSrc = (value: string | null | undefined) => {
+        if (!value) return null;
+        if (value.startsWith('http')) return value;
+        return value.startsWith('/') ? value : `/${value}`;
     };
 
     const visibleColumns = Object.entries(columns).filter(
@@ -254,6 +261,35 @@ export default function Index({ title, columns, items, filters }: Props) {
 
                                         {visibleColumns.map(([key, meta]) => {
                                             const value = (item as unknown as Record<string, unknown>)[key];
+
+                                            if (meta.type === 'image') {
+                                                const src = getImageSrc(
+                                                    value as string,
+                                                );
+                                                return (
+                                                    <TableCell key={key}>
+                                                        {src ? (
+                                                            <img
+                                                                src={src}
+                                                                alt={
+                                                                    (item as any).name ??
+                                                                    'Category'
+                                                                }
+                                                                className="h-10 w-10 rounded-md object-cover"
+                                                            />
+                                                        ) : (
+                                                            <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-neutral-200 text-xs font-medium text-neutral-600 dark:bg-neutral-850 dark:text-neutral-400">
+                                                                {(item as any).name
+                                                                    ?.charAt(
+                                                                        0,
+                                                                    )
+                                                                    .toUpperCase() ??
+                                                                    '?'}
+                                                            </span>
+                                                        )}
+                                                    </TableCell>
+                                                );
+                                            }
 
                                             if (meta.type === 'status') {
                                                 const isActive =

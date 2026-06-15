@@ -57,5 +57,10 @@ return [
     'ai' => [
         'api_key' => env('AI_API_KEY'),
     ],
+    'brevo' => [
+        'key' => env('BREVO_API_KEY'),
+        'dsn' => 'brevo+api://' . env('BREVO_API_KEY') . '@default',
+    ],
+
 
 ];

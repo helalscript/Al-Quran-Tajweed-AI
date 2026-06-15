@@ -30,7 +30,7 @@ class CategoryService
             $languageCode = $request->language_code ?? $this->user->language_code ?? 'en';
 
             $categories = Category::where('type', 'dua')
-                ->select('id', 'name', 'slug', 'type', 'order')
+                ->select('id', 'name', 'slug', 'type', 'order', 'image')
                 ->where('status', 'active')
                 ->where(function ($query) use ($search) {
                     $query->where('name', 'like', "%{$search}%")
@@ -48,6 +48,7 @@ class CategoryService
                     'slug' => $category->slug,
                     'type' => $category->type,
                     'order' => $category->order,
+                    'image' => $category->image,
                     'duas_count' => $category->dua_dhikirs_count,
                 ];
             });
@@ -71,7 +72,7 @@ class CategoryService
             $languageCode = request()->language_code ?? $this->user->language_code ?? 'en';
 
             $category = Category::where('id', $id)
-                ->select('id', 'name', 'slug', 'type', 'order')
+                ->select('id', 'name', 'slug', 'type', 'order', 'image')
                 ->where('type', 'dua')
                 ->where('status', 'active')
                 ->withCount(['duaDhikirs' => function($query) {

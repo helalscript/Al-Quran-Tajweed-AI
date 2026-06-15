@@ -7,7 +7,10 @@ import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+
+const ACCEPT_IMAGE = 'image/jpeg,image/png,image/webp,image/gif';
+const MAX_SIZE_MB = 2;
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: dashboard().url },
@@ -16,16 +19,78 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Create() {
-    const { data, setData, post, processing, errors } = useForm({
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [dragActive, setDragActive] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+    const { data, setData, post, processing, errors } = useForm<{
+        name: string;
+        type: string;
+        order: number;
+        status: string;
+        image: File | null;
+    }>({
         name: '',
         type: '',
         order: 0,
         status: 'active',
+        image: null,
     });
 
-    const submit: FormEventHandler = (e) => {
+    useEffect(() => {
+        if (data.image instanceof File) {
+            const url = URL.createObjectURL(data.image);
+            setPreviewUrl(url);
+            return () => URL.revokeObjectURL(url);
+        }
+        setPreviewUrl(null);
+    }, [data.image]);
+
+    const handleFile = (file: File | null) => {
+        if (!file) {
+            setData('image', null);
+            return;
+        }
+        if (!file.type.startsWith('image/')) {
+            return;
+        }
+        if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+            return;
+        }
+        setData('image', file);
+    };
+
+    const onDrag = (e: React.DragEvent) => {
         e.preventDefault();
-        post('/admin/categories');
+        e.stopPropagation();
+        setDragActive(true);
+    };
+
+    const onDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragActive(false);
+    };
+
+    const onDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragActive(false);
+        const file = e.dataTransfer.files?.[0];
+        handleFile(file ?? null);
+    };
+
+    const onFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0] ?? null;
+        handleFile(file);
+        e.target.value = '';
+    };
+
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault();
+        post('/admin/categories', {
+            forceFormData: true,
+        });
     };
 
     return (
@@ -71,6 +136,49 @@ export default function Create() {
                                 <option value="prayer">Prayer</option>
                             </select>
                             <InputError message={errors.type} className="mt-2" />
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <Label>Image</Label>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept={ACCEPT_IMAGE}
+                                className="sr-only"
+                                onChange={onFileInputChange}
+                            />
+                            <div
+                                onDragEnter={onDrag}
+                                onDragOver={onDrag}
+                                onDragLeave={onDragLeave}
+                                onDrop={onDrop}
+                                onClick={() => fileInputRef.current?.click()}
+                                className={`flex min-h-[160px] cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed p-4 text-center transition-colors ${
+                                    dragActive
+                                        ? 'border-primary bg-primary/5'
+                                        : 'border-input hover:border-primary/50 hover:bg-muted/50'
+                                }`}
+                            >
+                                {previewUrl ? (
+                                    <img
+                                        src={previewUrl}
+                                        alt="Category Preview"
+                                        className="mx-auto max-h-48 max-w-full rounded object-contain"
+                                    />
+                                ) : (
+                                    <>
+                                        <p className="text-sm text-muted-foreground">
+                                            Drag and drop an image here, or
+                                            click to select
+                                        </p>
+                                        <p className="mt-1 text-xs text-muted-foreground">
+                                            JPEG, PNG, WebP, GIF (max {MAX_SIZE_MB}
+                                            MB)
+                                        </p>
+                                    </>
+                                )}
+                            </div>
+                            <InputError message={errors.image} className="mt-2" />
                         </div>
 
                         <div>
