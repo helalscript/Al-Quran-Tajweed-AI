@@ -19,6 +19,13 @@ class CategoryController extends BaseAdminResourceController
             'title' => 'Categories',
             'index_view' => 'admin/categories/index',
             'columns' => [
+                'image' => [
+                    'label' => 'Image',
+                    'type' => 'image',
+                    'searchable' => false,
+                    'filterable' => false,
+                    'visible' => true,
+                ],
                 'name' => [
                     'label' => 'Name',
                     'searchable' => true,
@@ -55,10 +62,16 @@ class CategoryController extends BaseAdminResourceController
             'type' => ['required', 'in:dua,quran,prayer'],
             'order' => ['required', 'integer', 'min:0'],
             'status' => ['required', 'in:active,inactive'],
+            'image' => ['nullable', 'image', 'max:2048'],
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
         $validated['translations'] = []; // Keep empty array for now
+
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('categories', 'public');
+            $validated['image'] = 'storage/' . $imagePath;
+        }
 
         Category::create($validated);
 
@@ -76,6 +89,7 @@ class CategoryController extends BaseAdminResourceController
                 'type' => $category->type,
                 'order' => $category->order,
                 'status' => $category->status,
+                'image' => $category->image,
             ],
         ]);
     }
@@ -87,9 +101,20 @@ class CategoryController extends BaseAdminResourceController
             'type' => ['required', 'in:dua,quran,prayer'],
             'order' => ['required', 'integer', 'min:0'],
             'status' => ['required', 'in:active,inactive'],
+            'image' => ['nullable', 'image', 'max:2048'],
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
+
+        if ($request->hasFile('image')) {
+            // Delete old image if it exists
+            if ($category->image) {
+                $oldPath = str_replace('storage/', '', $category->image);
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
+            }
+            $imagePath = $request->file('image')->store('categories', 'public');
+            $validated['image'] = 'storage/' . $imagePath;
+        }
 
         $category->update($validated);
 
