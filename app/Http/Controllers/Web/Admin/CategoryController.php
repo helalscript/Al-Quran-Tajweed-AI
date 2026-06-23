@@ -114,6 +114,8 @@ class CategoryController extends BaseAdminResourceController
             }
             $imagePath = $request->file('image')->store('categories', 'public');
             $validated['image'] = 'storage/' . $imagePath;
+        } else {
+            unset($validated['image']);
         }
 
         $category->update($validated);

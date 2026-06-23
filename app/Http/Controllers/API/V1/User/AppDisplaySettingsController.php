@@ -38,7 +38,7 @@ class AppDisplaySettingsController extends Controller
     public function updateDisplaySettings(Request $request)
     {
         $validatedData = $request->validate([
-            'font_size' => 'sometimes|numeric|min:10|max:50',
+            'font_size' => 'sometimes|numeric|min:10|max:1000',
             'appearance' => 'sometimes|in:light,dark',
             'tajweed_color_guide' => 'sometimes|boolean',
             'arabic_script' => 'sometimes|in:uthmani,mushaf_al,quran_standard_bahriyah,indopak',
