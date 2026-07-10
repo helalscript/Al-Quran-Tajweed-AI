@@ -60,4 +60,22 @@ class PrayerTimeController extends Controller
             return Helper::jsonErrorResponse('Unable to update prayer time notification settings', 500);
         }
     }
+
+    public function getPrayerTimesWithCountries(Request $request)
+    {
+        $validatedData = $request->validate([
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+            'method' => 'sometimes|integer',
+        ]);
+        try {
+            $prayerTimeNotificationSettings = $this->prayerTimeService->getPrayerTimesWithCountries($validatedData);
+            return Helper::jsonResponse(true, 'Prayer time notification settings fetched successfully', 200, $prayerTimeNotificationSettings);
+        } catch (Exception $e) {
+            Log::error("PrayerTimeController::getPrayerTimeNotificationSettings" . $e->getMessage());
+            return Helper::jsonErrorResponse('Unable to fetch prayer time notification settings', 500);
+        }
+    }
+
+
 }

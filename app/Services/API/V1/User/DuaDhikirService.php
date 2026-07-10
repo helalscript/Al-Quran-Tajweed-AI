@@ -184,15 +184,15 @@ class DuaDhikirService
         try {
             $perPage = $request->per_page ?? 25;
             $languageCode = $request->language_code ?? $this->user->language_code ?? 'en';
-            $query = $request->query ?? '';
+            $query = $request->keyword ?? '';
+
 
             $duas = DuaDhikir::where('status', 'active')
                 ->where(function ($q) use ($query, $languageCode) {
                     $q->whereHas('translations', function ($sub) use ($query, $languageCode) {
                         $sub->where('language_code', $languageCode)
                             ->where(function ($inner) use ($query) {
-                                $inner->where('title', 'like', "%{$query}%")
-                                    ->orWhere('translation', 'like', "%{$query}%")
+                                $inner->whereFullText(['title', 'translation'], $query)
                                     ->orWhere('notes', 'like', "%{$query}%")
                                     ->orWhere('benefits', 'like', "%{$query}%");
                             });
