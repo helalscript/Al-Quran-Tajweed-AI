@@ -111,8 +111,8 @@ Route::group(['middleware' => ['auth:api', 'is_user']], function ($router) {
     // dua dhikrs
     Route::get('dua/categories/{categoryId}/duas', [DuaDhikirController::class, 'getByCategory']);
     Route::get('dua/categories/slug/{slug}/duas', [DuaDhikirController::class, 'getByCategorySlug']);
-    Route::get('dua/{id}', [DuaDhikirController::class, 'show']);
     Route::get('dua/search', [DuaDhikirController::class, 'search']);
+    Route::get('dua/{id}', [DuaDhikirController::class, 'show']);
 
     // favourites
     Route::get('favourites', [FavouriteController::class, 'index']);

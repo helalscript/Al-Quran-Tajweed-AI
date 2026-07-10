@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\Pool;
 
 class PrayerTimeService
 {
@@ -84,6 +85,72 @@ class PrayerTimeService
             return $prayerTimeNotificationSettings;
         } catch (Exception $e) {
             Log::error("PrayerTimeService::updatePrayerTimeNotificationSettings" . $e->getMessage());
+            throw $e;
+        }
+    }
+
+
+    public function getPrayerTimesWithCountries(array $validatedData)
+    {
+        try {
+            $method = $validatedData['method'] ?? 1;
+
+            $locations = [
+                'current' => [
+                    'latitude' => $validatedData['latitude'],
+                    'longitude' => $validatedData['longitude'],
+                ],
+                'malaysia' => [
+                    'latitude' => 3.1390,      // Kuala Lumpur
+                    'longitude' => 101.6869,
+                ],
+                'indonesia' => [
+                    'latitude' => -6.2088,     // Jakarta
+                    'longitude' => 106.8456,
+                ],
+                'singapore' => [
+                    'latitude' => 1.3521,
+                    'longitude' => 103.8198,
+                ],
+            ];
+
+            $responses = Http::pool(function (Pool $pool) use ($locations, $method) {
+                return [
+                    'current' => $pool->get('https://api.aladhan.com/v1/timings', [
+                        'latitude' => $locations['current']['latitude'],
+                        'longitude' => $locations['current']['longitude'],
+                        'method' => $method,
+                    ]),
+
+                    'malaysia' => $pool->get('https://api.aladhan.com/v1/timings', [
+                        'latitude' => $locations['malaysia']['latitude'],
+                        'longitude' => $locations['malaysia']['longitude'],
+                        'method' => $method,
+                    ]),
+
+                    'indonesia' => $pool->get('https://api.aladhan.com/v1/timings', [
+                        'latitude' => $locations['indonesia']['latitude'],
+                        'longitude' => $locations['indonesia']['longitude'],
+                        'method' => $method,
+                    ]),
+
+                    'singapore' => $pool->get('https://api.aladhan.com/v1/timings', [
+                        'latitude' => $locations['singapore']['latitude'],
+                        'longitude' => $locations['singapore']['longitude'],
+                        'method' => $method,
+                    ]),
+                ];
+            });
+
+            return response()->json([
+                'current' => $responses['current']->json(),
+                'malaysia' => $responses['malaysia']->json(),
+                'indonesia' => $responses['indonesia']->json(),
+                'singapore' => $responses['singapore']->json(),
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error("PrayerTimeService::getPrayerTimesWithCountries " . $e->getMessage());
             throw $e;
         }
     }
