@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('dua_translations', function (Blueprint $table) {
             $table->fullText(
-                ['title', 'translation', 'notes', 'benefits', 'fawaid'],
+                ['title', 'translation'],
                 'dua_translations_fulltext'
             );
         });
