@@ -59,6 +59,8 @@ Route::group(['middleware' => ['auth:api', 'is_user']], function ($router) {
 
     // prayer times
     Route::post('prayer-times', [PrayerTimeController::class, 'getPrayerTimes']);
+    //prayer times with countries
+    Route::post('prayer-times-countries', [PrayerTimeController::class, 'getPrayerTimesWithCountries']);
     // prayer time notification settings
     Route::get('prayer-time-notification-settings', [PrayerTimeController::class, 'getPrayerTimeNotificationSettings']);
     Route::put('update-prayer-time-notification-settings', [PrayerTimeController::class, 'updatePrayerTimeNotificationSettings']);
