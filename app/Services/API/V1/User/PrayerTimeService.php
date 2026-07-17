@@ -116,25 +116,25 @@ class PrayerTimeService
 
             $responses = Http::pool(function (Pool $pool) use ($locations, $method) {
                 return [
-                    'current' => $pool->get('https://api.aladhan.com/v1/timings', [
+                    $pool->as('current')->get('https://api.aladhan.com/v1/timings', [
                         'latitude' => $locations['current']['latitude'],
                         'longitude' => $locations['current']['longitude'],
                         'method' => $method,
                     ]),
 
-                    'malaysia' => $pool->get('https://api.aladhan.com/v1/timings', [
+                    $pool->as('malaysia')->get('https://api.aladhan.com/v1/timings', [
                         'latitude' => $locations['malaysia']['latitude'],
                         'longitude' => $locations['malaysia']['longitude'],
                         'method' => $method,
                     ]),
 
-                    'indonesia' => $pool->get('https://api.aladhan.com/v1/timings', [
+                    $pool->as('indonesia')->get('https://api.aladhan.com/v1/timings', [
                         'latitude' => $locations['indonesia']['latitude'],
                         'longitude' => $locations['indonesia']['longitude'],
                         'method' => $method,
                     ]),
 
-                    'singapore' => $pool->get('https://api.aladhan.com/v1/timings', [
+                    $pool->as('singapore')->get('https://api.aladhan.com/v1/timings', [
                         'latitude' => $locations['singapore']['latitude'],
                         'longitude' => $locations['singapore']['longitude'],
                         'method' => $method,
