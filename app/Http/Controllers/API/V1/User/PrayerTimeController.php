@@ -69,11 +69,11 @@ class PrayerTimeController extends Controller
             'method' => 'sometimes|integer',
         ]);
         try {
-            $prayerTimeNotificationSettings = $this->prayerTimeService->getPrayerTimesWithCountries($validatedData);
-            return Helper::jsonResponse(true, 'Prayer time notification settings fetched successfully', 200, $prayerTimeNotificationSettings);
+            $prayerTimes = $this->prayerTimeService->getPrayerTimesWithCountries($validatedData);
+            return Helper::jsonResponse(true, 'Prayer times with countries fetched successfully', 200, $prayerTimes);
         } catch (Exception $e) {
-            Log::error("PrayerTimeController::getPrayerTimeNotificationSettings" . $e->getMessage());
-            return Helper::jsonErrorResponse('Unable to fetch prayer time notification settings', 500);
+            Log::error("PrayerTimeController::getPrayerTimesWithCountries " . $e->getMessage());
+            return Helper::jsonErrorResponse('Unable to fetch prayer times with countries', 500);
         }
     }
 
