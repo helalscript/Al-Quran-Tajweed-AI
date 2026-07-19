@@ -62,5 +62,8 @@ return [
         'dsn' => 'brevo+api://' . env('BREVO_API_KEY') . '@default',
     ],
 
+    'alquran' => [
+        'source' => env('QURAN_DATA_SOURCE', 'api'),
+    ],
 
 ];

@@ -25,7 +25,7 @@ class AlQuranController extends Controller
 
             return Helper::jsonResponse(true, 'Surahs fetched successfully', 200, $surahs);
         } catch (Exception $e) {
-            Log::error('AlQuranController::getAllSurahs'.$e->getMessage());
+            Log::error('AlQuranController::getAllSurahs' . $e->getMessage());
 
             return Helper::jsonErrorResponse('Failed to fetch surahs', 500);
         }
@@ -34,14 +34,14 @@ class AlQuranController extends Controller
     /**
      * Display the specified resource.
      */
-    public function getSurahByNumber(string $number,$editions="'quran-uthmani'")
+    public function getSurahByNumber(string $number, $editions = "'quran-uthmani'")
     {
         try {
-            $surah = $this->alQuranService->getSurahByNumber($number,$editions);
+            $surah = $this->alQuranService->getSurahByNumber($number, $editions);
 
             return Helper::jsonResponse(true, 'Surah fetched successfully', 200, $surah);
         } catch (Exception $e) {
-            Log::error('AlQuranController::getSurahByNumber'.$e->getMessage());
+            Log::error('AlQuranController::getSurahByNumber' . $e->getMessage());
 
             return Helper::jsonErrorResponse('Failed to fetch surah', 500);
         }
@@ -54,7 +54,7 @@ class AlQuranController extends Controller
 
             return Helper::jsonResponse(true, 'Juzs fetched successfully', 200, $juzs);
         } catch (Exception $e) {
-            Log::error('AlQuranController::getAllJuzs'.$e->getMessage());
+            Log::error('AlQuranController::getAllJuzs' . $e->getMessage());
 
             return Helper::jsonErrorResponse('Failed to fetch juzs', 500);
         }
@@ -67,7 +67,7 @@ class AlQuranController extends Controller
 
             return Helper::jsonResponse(true, 'Juz fetched successfully', 200, $juz);
         } catch (Exception $e) {
-            Log::error('AlQuranController::getJuzByNumber'.$e->getMessage());
+            Log::error('AlQuranController::getJuzByNumber' . $e->getMessage());
 
             return Helper::jsonErrorResponse('Failed to fetch juz', 500);
         }
@@ -80,7 +80,7 @@ class AlQuranController extends Controller
 
             return Helper::jsonResponse(true, 'Surahs fetched successfully', 200, $surahs);
         } catch (Exception $e) {
-            Log::error('AlQuranController::getAllSurahsByUserLanguage'.$e->getMessage());
+            Log::error('AlQuranController::getAllSurahsByUserLanguage' . $e->getMessage());
 
             return Helper::jsonErrorResponse('Failed to fetch surahs', 500);
         }
@@ -93,8 +93,29 @@ class AlQuranController extends Controller
 
             return Helper::jsonResponse(true, 'Tajweed surah fetched successfully', 200, $tajweedSurah);
         } catch (Exception $e) {
-            Log::error('AlQuranController::showTajweedSurah'.$e->getMessage());
+            Log::error('AlQuranController::showTajweedSurah' . $e->getMessage());
             return Helper::jsonErrorResponse('Failed to fetch tajweed surah', 500);
+        }
+    }
+
+    public function search(\Illuminate\Http\Request $request)
+    {
+        try {
+            $query = $request->input('q');
+            $language = $request->input('language', 'bn');
+            $offset = (int) $request->input('offset', 0);
+            $limit = (int) $request->input('limit', 50);
+
+            if (!$query) {
+                return Helper::jsonErrorResponse('Query parameter "q" is required', 400);
+            }
+
+            $results = $this->alQuranService->search($query, $language, $offset, $limit);
+
+            return Helper::jsonResponse(true, 'Search results fetched successfully', 200, $results);
+        } catch (Exception $e) {
+            Log::error('AlQuranController::search ' . $e->getMessage());
+            return Helper::jsonErrorResponse('Failed to perform search', 500);
         }
     }
 }
