@@ -60,11 +60,11 @@ class AlQuranService
         }
     }
 
-    public function getSurahByNumber(string $number, string $defaultEdition = 'quran-uthmani'): array
+    public function getSurahByNumber(string $number, string $defaultEdition = 'quran-uthmani', ?string $translationEdition = null, ?string $audioEdition = null): array
     {
         try {
-            $userLanguageEdition = (array) $this->getUserLanguageEdition();
-            $userRecitation = (array) $this->getUserRecitation();
+            $userLanguageEdition = $translationEdition ? [$translationEdition] : (array) $this->getUserLanguageEdition();
+            $userRecitation = $audioEdition ? [$audioEdition] : (array) $this->getUserRecitation();
 
             $allEditions = array_map(function ($e) {
                 return trim($e, "'\" ");
@@ -622,6 +622,107 @@ class AlQuranService
 
         } catch (Exception $e) {
             Log::error('AlQuranService::search ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function getPage(int $pageNumber, string $defaultEdition = 'quran-uthmani')
+    {
+        try {
+            if (config('services.alquran.source') === 'database') {
+                $userLanguageEdition = (array) $this->getUserLanguageEdition();
+                $userRecitation = (array) $this->getUserRecitation();
+
+                $allEditions = array_map(function ($e) {
+                    return trim($e, "'\" ");
+                }, array_unique(array_merge(
+                        [$defaultEdition],
+                        $userLanguageEdition,
+                        $userRecitation,
+                        ['quran-tajweed']
+                    )));
+
+                $editionParam = implode(",", $allEditions);
+
+                return Cache::remember('db_page_' . $pageNumber . '_' . md5($editionParam), now()->addMonth(), function () use ($pageNumber, $allEditions) {
+                    $ayahs = \App\Models\Ayah::with('surah')->where('page', $pageNumber)->orderBy('number')->get();
+                    
+                    if ($ayahs->isEmpty())
+                        throw new Exception('Page not found in DB');
+
+                    $editionIds = Edition::whereIn('identifier', $allEditions)->pluck('id', 'identifier');
+                    
+                    $ayahEditions = \App\Models\AyahEdition::whereIn('ayah_id', $ayahs->pluck('number'))
+                        ->whereIn('edition_id', $editionIds->values())
+                        ->get()
+                        ->groupBy('ayah_id');
+
+                    $uthmaniId = $editionIds['quran-uthmani'] ?? null;
+                    $tajweedId = $editionIds['quran-tajweed'] ?? null;
+                    $transId = null;
+                    foreach ($allEditions as $e) {
+                        if ($e !== 'quran-uthmani' && $e !== 'quran-tajweed' && !str_starts_with($e, 'ar.')) {
+                            $transId = $editionIds[$e] ?? null;
+                            break;
+                        }
+                    }
+                    $audioId = null;
+                    foreach ($allEditions as $e) {
+                        if (str_starts_with($e, 'ar.') && $e !== 'quran-uthmani' && $e !== 'quran-tajweed') {
+                            $audioId = $editionIds[$e] ?? null;
+                            break;
+                        }
+                    }
+
+                    $ayahsData = [];
+                    foreach ($ayahs as $ayah) {
+                        $editionsForAyah = $ayahEditions->get($ayah->number, collect());
+                        $surah = $ayah->surah;
+
+                        $ayahsData[] = [
+                            'number' => $ayah->number,
+                            'numberInSurah' => $ayah->number_in_surah,
+                            'juz' => $ayah->juz,
+                            'page' => $ayah->page,
+                            'ruku' => $ayah->ruku,
+                            'hizbQuarter' => $ayah->hizb_quarter,
+                            'sajda' => $ayah->sajda,
+                            'surah' => [
+                                'number' => $surah->number,
+                                'name' => $surah->name,
+                                'englishName' => $surah->english_name,
+                                'englishNameTranslation' => $surah->english_name_translation,
+                            ],
+                            'arabic' => $editionsForAyah->firstWhere('edition_id', $uthmaniId)?->text ?? '',
+                            'tajweed' => $editionsForAyah->firstWhere('edition_id', $tajweedId)?->text ?? '',
+                            'translation' => $editionsForAyah->firstWhere('edition_id', $transId)?->text ?? '',
+                            'audio' => $editionsForAyah->firstWhere('edition_id', $audioId)?->audio_url ?? '',
+                        ];
+                    }
+
+                    return [
+                        'code' => 200,
+                        'status' => 'OK',
+                        'data' => [
+                            'number' => $pageNumber,
+                            'ayahs' => $ayahsData,
+                        ]
+                    ];
+                });
+            }
+
+            return Cache::remember('page_' . $pageNumber, now()->addMonth(), function () use ($pageNumber) {
+                $apiUrl = 'https://api.alquran.cloud/v1/page/' . $pageNumber . '/quran-uthmani';
+                $response = Http::get($apiUrl);
+
+                if ($response->successful()) {
+                    return $response->json();
+                } else {
+                    throw new Exception('Failed to fetch page from external API.');
+                }
+            });
+        } catch (Exception $e) {
+            Log::error('AlQuranService::getPage ' . $e->getMessage());
             throw $e;
         }
     }

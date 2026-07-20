@@ -47,6 +47,11 @@ const mainNavItems: NavItem[] = [
         icon: Users,
     },
     {
+        title: 'Al Quran',
+        href: '/admin/al-quran',
+        icon: BookOpen,
+    },
+    {
         title: 'Dynamic Pages',
         href: '/admin/pages',
         icon: FileText,
