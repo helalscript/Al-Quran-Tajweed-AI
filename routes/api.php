@@ -22,6 +22,7 @@ use App\Http\Controllers\API\V1\User\MemorizationController;
 use App\Http\Controllers\API\V1\User\NotificationController;
 use App\Http\Controllers\API\V1\User\PrayerTimeController;
 use App\Http\Controllers\API\V1\User\QiblaDirectionController;
+use App\Http\Controllers\API\V1\User\QuranReadingHistoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -69,21 +70,18 @@ Route::group(['middleware' => ['auth:api', 'is_user']], function ($router) {
     Route::post('qibla-direction', [QiblaDirectionController::class, 'getDirection']);
 
     // al quran
-    Route::get('al-quran/surahs', [AlQuranController::class, 'getAllSurahs']);
-    Route::get('al-quran/surahs/{number}/editions/{editions?}', [AlQuranController::class, 'getSurahByNumber']);
-    Route::get('al-quran/search', [AlQuranController::class, 'search']);
+    Route::group(['prefix' => 'al-quran'], function () {
+        Route::get('surahs', [AlQuranController::class, 'getAllSurahs']);
+        Route::get('surahs/language', [AlQuranController::class, 'getAllSurahsByUserLanguage']);
+        Route::get('surahs/{number}', [AlQuranController::class, 'getSurahByNumber']);
+        Route::get('surah/tajweed/{number}', [AlQuranController::class, 'showTajweedSurah']);
+        Route::get('juzs', [AlQuranController::class, 'getAllJuzs']);
+        Route::get('juzs/{number}', [AlQuranController::class, 'getJuzByNumber']);
+        Route::get('search', [AlQuranController::class, 'search']);
 
-    // tajweed surah
-    Route::get('al-quran/surahs/tajweed/{number}', [AlQuranController::class, 'showTajweedSurah']);
-
-    // Juzs
-    Route::get('al-quran/juzs', [AlQuranController::class, 'getAllJuzs']);
-
-    // Juz by number
-    Route::get('al-quran/juzs/{number}', [AlQuranController::class, 'getJuzByNumber']);
-
-    // all surahs by user language
-    Route::get('al-quran/surahs-by-user-language', [AlQuranController::class, 'getAllSurahsByUserLanguage']);
+        Route::post('history', [QuranReadingHistoryController::class, 'saveLastRead']);
+        Route::get('history', [QuranReadingHistoryController::class, 'getLastRead']);
+    });
 
     // notifications
     Route::apiResource('notifications', NotificationController::class)->only(['index', 'show']);

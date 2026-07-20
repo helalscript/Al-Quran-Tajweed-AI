@@ -48,6 +48,11 @@ Route::middleware(['auth', 'role_check'])->group(function () {
 
         Route::resource('categories', CategoryController::class)->except(['show']);
         Route::patch('categories/{category}/toggle', [CategoryController::class, 'toggleStatus'])->name('categories.toggle');
+
+        Route::get('al-quran', [\App\Http\Controllers\Web\Admin\AlQuranController::class, 'index'])->name('al-quran.index');
+        Route::get('al-quran/page/{page}', [\App\Http\Controllers\Web\Admin\AlQuranController::class, 'showPage'])->name('al-quran.page');
+        Route::get('al-quran/{surah}', [\App\Http\Controllers\Web\Admin\AlQuranController::class, 'show'])->name('al-quran.show');
+        Route::patch('al-quran/ayah/{ayah_id}/edition/{edition_id}', [\App\Http\Controllers\Web\Admin\AlQuranController::class, 'updateAyah'])->name('al-quran.update-ayah');
     });
 });
 
