@@ -73,7 +73,7 @@ Route::group(['middleware' => ['auth:api', 'is_user']], function ($router) {
     Route::group(['prefix' => 'al-quran'], function () {
         Route::get('surahs', [AlQuranController::class, 'getAllSurahs']);
         Route::get('surahs/language', [AlQuranController::class, 'getAllSurahsByUserLanguage']);
-        Route::get('surahs/{number}', [AlQuranController::class, 'getSurahByNumber']);
+        Route::get('surahs/{number}/editions/{editions?}', [AlQuranController::class, 'getSurahByNumber']);
         Route::get('surah/tajweed/{number}', [AlQuranController::class, 'showTajweedSurah']);
         Route::get('juzs', [AlQuranController::class, 'getAllJuzs']);
         Route::get('juzs/{number}', [AlQuranController::class, 'getJuzByNumber']);

@@ -258,10 +258,14 @@ class AlQuranService
                             }
                         }
 
+                        $firstSurah = $ayahs->first()->surah;
                         $juzs[] = [
                             'juz' => $i,
                             'ayahs_count' => $ayahs->count(),
-                            'start_surah' => $ayahs->first()->surah->english_name,
+                            'start_surah' => [
+                                'name' => $firstSurah->name,
+                                'english_name' => $firstSurah->english_name,
+                            ],
                             'start_ayah' => $ayahs->first()->number_in_surah,
                             'surahs' => array_values($surahsInJuz),
                         ];
@@ -298,10 +302,14 @@ class AlQuranService
                         }
                     }
 
+                    $firstSurah = $data['ayahs'][0]['surah'];
                     $juzs[] = [
                         'juz' => $i,
                         'ayahs_count' => count($data['ayahs']),
-                        'start_surah' => $data['ayahs'][0]['surah']['englishName'],
+                        'start_surah' => [
+                            'name' => $firstSurah['name'],
+                            'english_name' => $firstSurah['englishName'],
+                        ],
                         'start_ayah' => $data['ayahs'][0]['numberInSurah'],
                         'surahs' => array_values($surahsInJuz),
                     ];
