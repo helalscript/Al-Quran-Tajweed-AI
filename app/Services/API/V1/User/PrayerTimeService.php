@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Client\Pool;
 
 class PrayerTimeService
@@ -151,6 +152,153 @@ class PrayerTimeService
 
         } catch (\Exception $e) {
             Log::error("PrayerTimeService::getPrayerTimesWithCountries " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function getSingaporeOrLocalPrayerTimes($validatedData)
+    {
+        try {
+            $timezone = new \DateTimeZone('Asia/Singapore');
+            $dateTime = new \DateTime('now', $timezone);
+            $currentDate = $dateTime->format('Y-m-d');
+            $dateForHijri = $dateTime->format('d-m-Y');
+
+            $latitude = $validatedData['latitude'] ?? null;
+            $longitude = $validatedData['longitude'] ?? null;
+            $method = $validatedData['method'] ?? 1;
+
+            $cacheKey = "prayer_times_" . ($latitude ?? 'default') . "_" . ($longitude ?? 'default') . "_" . $method . "_" . $currentDate;
+
+            $formattedData = Cache::remember($cacheKey, now()->addMinutes(30), function () use ($latitude, $longitude, $method, $currentDate, $dateForHijri, $dateTime) {
+                // Fetch AlAdhan API requests in parallel using pool
+                $responses = Http::pool(function (Pool $pool) use ($latitude, $longitude, $method, $dateForHijri) {
+                    $calls = [
+                        $pool->as('malaysia')->get('https://api.aladhan.com/v1/timings', [
+                            'latitude' => 3.1390,
+                            'longitude' => 101.6869,
+                            'method' => 17, // JAKIM
+                        ]),
+                        $pool->as('indonesia')->get('https://api.aladhan.com/v1/timings', [
+                            'latitude' => -6.2088,
+                            'longitude' => 106.8456,
+                            'method' => 20, // Kemenag
+                        ]),
+                        $pool->as('hijri_singapore')->get("https://api.aladhan.com/v1/gToH/{$dateForHijri}", [
+                            'calendarMethod' => 'MATHEMATICAL',
+                            'adjustment' => 1,
+                        ]),
+                    ];
+
+                    if ($latitude !== null && $longitude !== null) {
+                        $calls[] = $pool->as('local')->get('https://api.aladhan.com/v1/timings', [
+                            'latitude' => $latitude,
+                            'longitude' => $longitude,
+                            'method' => $method,
+                        ]);
+                    }
+
+                    return $calls;
+                });
+
+                // Fetch Singapore times from data.gov.sg
+                $resourceId = 'd_a6a206cba471fe04b62dd886ef5eaf22';
+                $dataGovUrl = "https://data.gov.sg/api/action/datastore_search?resource_id=" . $resourceId . "&filters=" . urlencode(json_encode(['Date' => $currentDate]));
+
+                $responseSG = Http::get($dataGovUrl);
+                $dataGovResult = null;
+                if ($responseSG->successful()) {
+                    $jsonData = $responseSG->json();
+                    if (!empty($jsonData['result']['records'])) {
+                        $dataGovResult = $jsonData['result']['records'][0];
+                    }
+                }
+
+                if (!$dataGovResult) {
+                    // Fallback to AlAdhan timings for Singapore
+                    $fallbackSGResponse = Http::get('https://api.aladhan.com/v1/timings', [
+                        'latitude' => 1.3521,
+                        'longitude' => 103.8198,
+                        'method' => 11, // MUIS
+                    ]);
+                    if ($fallbackSGResponse->successful()) {
+                        $fallbackData = $fallbackSGResponse->json();
+                        $sgTimings = $fallbackData['data']['timings'];
+                    } else {
+                        throw new \Exception('Unable to fetch Singapore prayer times from data.gov.sg or AlAdhan fallback');
+                    }
+                } else {
+                    $sgTimings = [
+                        'Fajr' => $dataGovResult['Subuh'] ?? null,
+                        'Sunrise' => $dataGovResult['Syuruk'] ?? null,
+                        'Dhuhr' => $dataGovResult['Zohor'] ?? null,
+                        'Asr' => $dataGovResult['Asar'] ?? null,
+                        'Sunset' => $dataGovResult['Maghrib'] ?? null,
+                        'Maghrib' => $dataGovResult['Maghrib'] ?? null,
+                        'Isha' => $dataGovResult['Isyak'] ?? null,
+                        'Imsak' => isset($dataGovResult['Subuh']) ? date('H:i', strtotime($dataGovResult['Subuh']) - 600) : null,
+                        'Midnight' => null,
+                        'Firstthird' => null,
+                        'Lastthird' => null,
+                    ];
+                }
+
+                $malaysiaData = $responses['malaysia']->successful() ? $responses['malaysia']->json()['data'] : null;
+                $indonesiaData = $responses['indonesia']->successful() ? $responses['indonesia']->json()['data'] : null;
+                $hijriSGData = $responses['hijri_singapore']->successful() ? $responses['hijri_singapore']->json() : null;
+                $localData = isset($responses['local']) && $responses['local']->successful() ? $responses['local']->json()['data'] : null;
+
+                $data = [
+                    'singapore' => [
+                        'timings' => $sgTimings,
+                        'date' => [
+                            'readable' => $dateTime->format('d M Y'),
+                            'timestamp' => (string) $dateTime->getTimestamp(),
+                            'gregorian' => $hijriSGData['data']['gregorian'] ?? [
+                                'date' => $dateTime->format('d-m-Y'),
+                                'format' => 'DD-MM-YYYY',
+                                'day' => $dateTime->format('d'),
+                                'weekday' => [
+                                    'en' => $dateTime->format('l'),
+                                ],
+                                'month' => [
+                                    'number' => (int) $dateTime->format('m'),
+                                    'en' => $dateTime->format('F'),
+                                ],
+                                'year' => $dateTime->format('Y'),
+                            ],
+                            'hijri' => $hijriSGData['data']['hijri'] ?? [],
+                        ]
+                    ],
+                    'malaysia' => [
+                        'timings' => $malaysiaData['timings'] ?? null,
+                        'date' => $malaysiaData['date'] ?? null,
+                    ],
+                    'indonesia' => [
+                        'timings' => $indonesiaData['timings'] ?? null,
+                        'date' => $indonesiaData['date'] ?? null,
+                    ]
+                ];
+
+                if ($latitude !== null && $longitude !== null) {
+                    $data['local'] = [
+                        'timings' => $localData['timings'] ?? null,
+                        'date' => $localData['date'] ?? null,
+                        'meta' => $localData['meta'] ?? null,
+                    ];
+                }
+
+                return $data;
+            });
+
+            return response()->json([
+                'code' => 200,
+                'status' => 'OK',
+                'data' => $formattedData
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error("PrayerTimeService::getSingaporeOrLocalPrayerTimes: " . $e->getMessage());
             throw $e;
         }
     }
