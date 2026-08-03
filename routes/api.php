@@ -59,6 +59,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
 Route::group(['middleware' => ['auth:api', 'is_user']], function ($router) {
 
     // prayer times
+    Route::post('prayer-times-new', [PrayerTimeController::class, 'getSingaporeOrLocalPrayerTimes']);
     Route::post('prayer-times', [PrayerTimeController::class, 'getPrayerTimes']);
     //prayer times with countries
     Route::post('prayer-times-countries', [PrayerTimeController::class, 'getPrayerTimesWithCountries']);

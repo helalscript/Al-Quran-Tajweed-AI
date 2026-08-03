@@ -77,5 +77,19 @@ class PrayerTimeController extends Controller
         }
     }
 
+    public function getSingaporeOrLocalPrayerTimes(Request $request)
+    {
+        $validatedData = $request->validate([
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'method' => 'sometimes|integer',
+        ]);
+        try {
+            return $this->prayerTimeService->getSingaporeOrLocalPrayerTimes($validatedData);
+        } catch (Exception $e) {
+            Log::error("PrayerTimeController::getSingaporeOrLocalPrayerTimes" . $e->getMessage());
+            return response()->json(['error' => 'Unable to fetch prayer times'], 500);
+        }
+    }
 
 }
