@@ -22,6 +22,7 @@ import {
     StepForward,
     BookOpenText,
     Users,
+    CreditCard,
 } from 'lucide-react';
 import AppLogo from './app-logo';
 
@@ -40,6 +41,11 @@ const mainNavItems: NavItem[] = [
         title: 'Dua & Dhikir',
         href: '/admin/dua-dhikir',
         icon: BookOpenText,
+    },
+    {
+        title: 'Subscriptions',
+        href: '/admin/subscriptions',
+        icon: CreditCard,
     },
     {
         title: 'Users',

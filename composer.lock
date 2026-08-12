@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0c16b666c492a20d8524444a2cc2455c",
+    "content-hash": "fd1e433d7ead6c3b6927fcedd40d4616",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -2790,6 +2790,96 @@
             "time": "2026-03-08T20:05:35+00:00"
         },
         {
+            "name": "moneyphp/money",
+            "version": "v4.9.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/moneyphp/money.git",
+                "reference": "d49ee625c6ba79b9d7a228ce153b02fc1032152b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/moneyphp/money/zipball/d49ee625c6ba79b9d7a228ce153b02fc1032152b",
+                "reference": "d49ee625c6ba79b9d7a228ce153b02fc1032152b",
+                "shasum": ""
+            },
+            "require": {
+                "ext-bcmath": "*",
+                "ext-filter": "*",
+                "ext-json": "*",
+                "php": "~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0"
+            },
+            "require-dev": {
+                "cache/taggable-cache": "^1.1.0",
+                "doctrine/coding-standard": "^12.0",
+                "doctrine/instantiator": "^1.5.0 || ^2.0",
+                "ext-gmp": "*",
+                "ext-intl": "*",
+                "florianv/exchanger": "^2.8.1",
+                "florianv/swap": "^4.3.0",
+                "moneyphp/crypto-currencies": "^1.1.0",
+                "moneyphp/iso-currencies": "^3.4",
+                "php-http/message": "^1.16.0",
+                "php-http/mock-client": "^1.6.0",
+                "phpbench/phpbench": "^1.2.5",
+                "phpstan/extension-installer": "^1.4",
+                "phpstan/phpstan": "^2.1.9",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpunit/phpunit": "^10.5.9",
+                "psr/cache": "^1.0.1 || ^2.0 || ^3.0",
+                "ticketswap/phpstan-error-formatter": "^1.1"
+            },
+            "suggest": {
+                "ext-gmp": "Calculate without integer limits",
+                "ext-intl": "Format Money objects with intl",
+                "florianv/exchanger": "Exchange rates library for PHP",
+                "florianv/swap": "Exchange rates library for PHP",
+                "psr/cache-implementation": "Used for Currency caching"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Money\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mathias Verraes",
+                    "email": "mathias@verraes.net",
+                    "homepage": "http://verraes.net"
+                },
+                {
+                    "name": "Márk Sági-Kazár",
+                    "email": "mark.sagikazar@gmail.com"
+                },
+                {
+                    "name": "Frederik Bosch",
+                    "email": "f.bosch@genkgo.nl"
+                }
+            ],
+            "description": "PHP implementation of Fowler's Money pattern",
+            "homepage": "http://moneyphp.org",
+            "keywords": [
+                "Value Object",
+                "money",
+                "vo"
+            ],
+            "support": {
+                "issues": "https://github.com/moneyphp/money/issues",
+                "source": "https://github.com/moneyphp/money/tree/v4.9.0"
+            },
+            "time": "2026-05-04T20:23:15+00:00"
+        },
+        {
             "name": "monolog/monolog",
             "version": "3.10.0",
             "source": {
@@ -3212,6 +3302,95 @@
                 "source": "https://github.com/nikic/PHP-Parser/tree/v5.7.0"
             },
             "time": "2025-12-06T11:56:16+00:00"
+        },
+        {
+            "name": "noopstudios/laravel-revenue-cat",
+            "version": "1.0.7",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/noopstudios/laravel-revenue-cat.git",
+                "reference": "20ec3b4aa7b232a52430aa742ae3e71aac8fdfd7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/noopstudios/laravel-revenue-cat/zipball/20ec3b4aa7b232a52430aa742ae3e71aac8fdfd7",
+                "reference": "20ec3b4aa7b232a52430aa742ae3e71aac8fdfd7",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "guzzlehttp/guzzle": "^7.8",
+                "illuminate/contracts": "^10.0||^11.0||^12.0||^13.0",
+                "illuminate/database": "^10.0||^11.0||^12.0||^13.0",
+                "illuminate/http": "^10.0||^11.0||^12.0||^13.0",
+                "illuminate/support": "^10.0||^11.0||^12.0||^13.0",
+                "laravel/framework": "^10.0||^11.0||^12.0||^13.0",
+                "moneyphp/money": "^4.0",
+                "nesbot/carbon": "^2.67||^3.0",
+                "php": "^8.2",
+                "spatie/laravel-package-tools": "^1.16",
+                "symfony/http-kernel": "^6.2||^7.0||^8.0"
+            },
+            "require-dev": {
+                "larastan/larastan": "^2.9||^3.0",
+                "laravel/pint": "^1.14",
+                "nunomaduro/collision": "^8.1.1||^7.10.0",
+                "orchestra/testbench": "^8.0||^9.0||^10.0",
+                "pestphp/pest": "^2.34||^3.0",
+                "pestphp/pest-plugin-arch": "^2.7||^3.0",
+                "pestphp/pest-plugin-laravel": "^2.3||^3.0",
+                "phpstan/extension-installer": "^1.3||^2.0",
+                "phpstan/phpstan-deprecation-rules": "^1.1||^2.0",
+                "phpstan/phpstan-phpunit": "^1.3||^2.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "LaravelRevenueCat": "NoopStudios\\LaravelRevenueCat\\Facades\\LaravelRevenueCat"
+                    },
+                    "providers": [
+                        "NoopStudios\\LaravelRevenueCat\\LaravelRevenueCatServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "NoopStudios\\LaravelRevenueCat\\": "src/",
+                    "NoopStudios\\LaravelRevenueCat\\Database\\Factories\\": "database/factories/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fábio Ferreira",
+                    "email": "fabio.ferreira@noop.pt",
+                    "role": "Developer"
+                }
+            ],
+            "description": "RevenueCat integration for Laravel to manage iOS and Android app subscriptions",
+            "homepage": "https://github.com/noopstudios/laravel-revenue-cat",
+            "keywords": [
+                "Fábio Ferreira",
+                "billing",
+                "laravel",
+                "laravel-revenue-cat",
+                "revenuecat",
+                "subscriptions"
+            ],
+            "support": {
+                "source": "https://github.com/noopstudios/laravel-revenue-cat/tree/1.0.7"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/noopstudios",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-04-13T17:42:41+00:00"
         },
         {
             "name": "nunomaduro/termwind",
@@ -4566,6 +4745,67 @@
                 "source": "https://github.com/ramsey/uuid/tree/4.9.2"
             },
             "time": "2025-12-14T04:43:48+00:00"
+        },
+        {
+            "name": "spatie/laravel-package-tools",
+            "version": "1.93.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/laravel-package-tools.git",
+                "reference": "d5552849801f2642aea710557463234b59ef65eb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/laravel-package-tools/zipball/d5552849801f2642aea710557463234b59ef65eb",
+                "reference": "d5552849801f2642aea710557463234b59ef65eb",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/contracts": "^10.0|^11.0|^12.0|^13.0",
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.5",
+                "orchestra/testbench": "^8.0|^9.2|^10.0|^11.0",
+                "pestphp/pest": "^2.1|^3.1|^4.0",
+                "phpunit/php-code-coverage": "^10.0|^11.0|^12.0",
+                "phpunit/phpunit": "^10.5|^11.5|^12.5",
+                "spatie/pest-plugin-test-time": "^2.2|^3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\LaravelPackageTools\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Freek Van der Herten",
+                    "email": "freek@spatie.be",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Tools for creating Laravel packages",
+            "homepage": "https://github.com/spatie/laravel-package-tools",
+            "keywords": [
+                "laravel-package-tools",
+                "spatie"
+            ],
+            "support": {
+                "issues": "https://github.com/spatie/laravel-package-tools/issues",
+                "source": "https://github.com/spatie/laravel-package-tools/tree/1.93.1"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/spatie",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-05-19T14:06:37+00:00"
         },
         {
             "name": "spomky-labs/cbor-php",
@@ -11721,5 +11961,5 @@
         "php": "^8.2"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }

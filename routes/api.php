@@ -125,6 +125,10 @@ Route::group(['middleware' => ['auth:api', 'is_user']], function ($router) {
     // editions
     Route::get('editions-translation', [EditionController::class, 'getTranslationEditions']);
     Route::get('editions-recitation', [EditionController::class, 'getRecitationEditions']);
+    
+    // subscriptions
+    Route::post('subscriptions/sync', [\App\Http\Controllers\API\V1\User\SubscriptionController::class, 'syncSubscription']);
+    Route::get('subscriptions/status', [\App\Http\Controllers\API\V1\User\SubscriptionController::class, 'checkStatus']);
 });
 
 // this is for admin
@@ -146,5 +150,8 @@ Route::get('dynamic-pages/{page_slug}', [GeneralSettingController::class, 'showD
 Route::get('faqs', [GeneralSettingController::class, 'getFaqs']);
 Route::apiResource('packages', PackageController::class)->only(['index', 'show']);
 Route::apiResource('stepper-pages', PublicStepperPageController::class)->only(['index', 'show']);
+
+// RevenueCat Webhook
+Route::post('webhook/revenuecat', [\App\Http\Controllers\API\V1\Webhook\RevenueCatWebhookController::class, 'handle']);
 
 //  require __DIR__ . '/api_v1.php';
