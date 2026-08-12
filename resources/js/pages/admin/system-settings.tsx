@@ -25,6 +25,9 @@ interface SystemSetting {
     stripe_mode?: string | null;
     stripe_webhook_secret?: string | null;
     ai_api_key?: string | null;
+    revenuecat_api_key?: string | null;
+    revenuecat_project_id?: string | null;
+    revenuecat_webhook_secret?: string | null;
     smtp_host?: string | null;
     smtp_port?: number | null;
     smtp_username?: string | null;
@@ -45,7 +48,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-type TabType = 'paypal' | 'stripe' | 'api' | 'smtp';
+type TabType = 'paypal' | 'stripe' | 'api' | 'smtp' | 'revenuecat';
 
 export default function SystemSettingsPage({ setting }: Props) {
     const [activeTab, setActiveTab] = useState<TabType>('paypal');
@@ -59,6 +62,9 @@ export default function SystemSettingsPage({ setting }: Props) {
         stripe_mode: setting.stripe_mode ?? 'test',
         stripe_webhook_secret: setting.stripe_webhook_secret ?? '',
         ai_api_key: setting.ai_api_key ?? '',
+        revenuecat_api_key: setting.revenuecat_api_key ?? '',
+        revenuecat_project_id: setting.revenuecat_project_id ?? '',
+        revenuecat_webhook_secret: setting.revenuecat_webhook_secret ?? '',
         smtp_host: setting.smtp_host ?? '',
         smtp_port: setting.smtp_port ?? '',
         smtp_username: setting.smtp_username ?? '',
@@ -117,6 +123,17 @@ export default function SystemSettingsPage({ setting }: Props) {
                             onClick={() => setActiveTab('api')}
                         >
                             API Integration
+                        </button>
+                        <button
+                            type="button"
+                            className={`rounded-md px-3.5 py-1.5 text-sm ${
+                                activeTab === 'revenuecat'
+                                    ? 'bg-white shadow-xs dark:bg-neutral-700 dark:text-neutral-100'
+                                    : 'text-neutral-500 hover:bg-neutral-200/60 hover:text-black dark:text-neutral-400 dark:hover:bg-neutral-700/60'
+                            }`}
+                            onClick={() => setActiveTab('revenuecat')}
+                        >
+                            RevenueCat
                         </button>
                         <button
                             type="button"
@@ -253,6 +270,43 @@ export default function SystemSettingsPage({ setting }: Props) {
                                     value={data.ai_api_key}
                                     onChange={(e) => setData('ai_api_key', e.target.value)}
                                 />
+                            </div>
+                        </Card>
+                    )}
+
+                    {activeTab === 'revenuecat' && (
+                        <Card className="p-6 space-y-4">
+                            <h2 className="text-lg font-medium">RevenueCat configuration</h2>
+
+                            <div className="grid gap-4 md:grid-cols-2">
+                                <div className="space-y-1.5 md:col-span-2">
+                                    <Label htmlFor="revenuecat_api_key">API Key</Label>
+                                    <Input
+                                        id="revenuecat_api_key"
+                                        type="password"
+                                        value={data.revenuecat_api_key}
+                                        onChange={(e) => setData('revenuecat_api_key', e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="revenuecat_project_id">Project ID</Label>
+                                    <Input
+                                        id="revenuecat_project_id"
+                                        value={data.revenuecat_project_id}
+                                        onChange={(e) => setData('revenuecat_project_id', e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="revenuecat_webhook_secret">Webhook Secret</Label>
+                                    <Input
+                                        id="revenuecat_webhook_secret"
+                                        type="password"
+                                        value={data.revenuecat_webhook_secret}
+                                        onChange={(e) => setData('revenuecat_webhook_secret', e.target.value)}
+                                    />
+                                </div>
                             </div>
                         </Card>
                     )}
